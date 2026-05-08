@@ -135,35 +135,7 @@ function processForecastData(list) {
 
 // Temizlenmiş 5 günlük listeyi arayüzdeki (HTML) kartlara dönüştürür
 // 2. VERİ ÇEKME VE İŞLEME MOTORU (Zeynep)
-function getFiveDayForecast(city) {
-    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
-    
-    // Veri gelirken butonu pasifleştir
-    $('#get-weather-btn').text('Aranıyor...').prop('disabled', true);
 
-    $.ajax({
-        url: url,
-        method: 'GET',
-        success: function(data) {
-            // Veriyi temizle, HTML'e bas ve efektleri tetikle
-            const temizVeri = processForecastData(data.list);
-            displayForecastToHTML(temizVeri, data.city.name);
-            
-            // Burası önemli: Efektleri tetiklerken ikon kodunu da gönder
-            createWeatherEffects(data.list[0].weather[0].main, temizVeri[0].ikon); 
-            
-            $('#add-to-fav-btn').fadeIn(); // Favoriye ekle butonunu göster
-        },
-        error: function() { 
-            // Amatör ALERT yerine profesyonel NOTIFY kullan
-            showNotify("Şehir bulunamadı! Geçerli bir şehir girin.", "info"); 
-        },
-        complete: function() {
-            // İşlem bitince butonu eski haline getir
-            $('#get-weather-btn').text('Göster').prop('disabled', false);
-        }
-    });
-}
 
 
 // --- processForecastData Fonksiyonunda İkon Belirleme Mantığını Değiştir ---
@@ -204,11 +176,11 @@ function processForecastData(list) {
         // -----------------------------------------------------
 
         return {
-            tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
-            enYuksek: Math.round(Math.max(...daily[date].temps)),
-            durum: daily[date].desc[0],
-            ikonHtml: finalIconHtml, // Artık ham kodu değil, hazır HTML'i gönderiyoruz
-            mainCond: daily[date].mainCond[0]
+            ttarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
+        enYuksek: Math.round(Math.max(...daily[date].temps)),
+        durum: daily[date].desc[0],
+        ikonKodu: daily[date].icons[0], // <--- AY İÇİN ŞART!
+        mainCond: daily[date].mainCond[0]
         };
     });
 }
@@ -217,16 +189,25 @@ function processForecastData(list) {
 // --- displayForecastToHTML Fonksiyonunu HTML Şablonunu Güncelle ---
 
 // Temizlenmiş 5 günlük listeyi arayüzdeki (HTML) kartlara dönüştürür
+
 function displayForecastToHTML(dailyForecasts, cityName) {
     const $container = $('#forecast-cards-container').empty();
     $('#forecast-city-name').text(cityName).show();
     
     dailyForecasts.forEach(day => {
+        let ikonHtml = '';
+        // Gece ('n' harfi varsa) ve Hava Açık ('Clear') ise Ay koy
+        if (day.ikonKodu && day.ikonKodu.includes('n') && day.mainCond === 'Clear') {
+            ikonHtml = `<i class="bi bi-moon-stars-fill text-moon fs-1 mx-auto my-3"></i>`;
+        } else {
+            ikonHtml = `<img src="https://openweathermap.org/img/wn/${day.ikonKodu}@2x.png" class="mx-auto" width="70">`;
+        }
+
         $container.append(`
             <div class="col">
-                <div class="card weather-card text-center p-3 h-100 glass-card border-0" data-cond="${day.mainCond}">
+                <div class="card weather-card text-center p-3 h-100 glass-card border-0">
                     <h6>${day.tarih}</h6>
-                    ${day.ikonHtml} 
+                    ${ikonHtml} 
                     <div class="fw-bold">${day.enYuksek}°</div>
                     <p class="small text-capitalize mb-0">${day.durum}</p>
                 </div>
@@ -260,23 +241,7 @@ function displayForecastToHTML(dailyForecasts, cityName) {
     }
 
     // Temizlenmiş 5 günlük listeyi arayüzdeki (HTML) kartlara dönüştürür
-    function displayForecastToHTML(dailyForecasts, cityName) {
-        const $container = $('#forecast-cards-container').empty();
-        $('#forecast-city-name').text(cityName).show();
-        
-        dailyForecasts.forEach(day => {
-            $container.append(`
-                <div class="col">
-                    <div class="card weather-card text-center p-3 h-100 glass-card" data-cond="${day.mainCond}">
-                        <h6>${day.tarih}</h6>
-                        <img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" width="70" alt="${day.durum}">
-                        <div class="fw-bold">${day.enYuksek}°</div>
-                        <p class="small text-capitalize mb-0">${day.durum}</p>
-                    </div>
-                </div>
-            `);
-        });
-    }
+    
 
 
     // =================================================================
@@ -284,31 +249,64 @@ function displayForecastToHTML(dailyForecasts, cityName) {
     // =================================================================
     
     // Gelen hava durumuna göre ekranda yağmur, kar veya yıldız oluşturur
-    function createWeatherEffects(condition) {
-        const $c = $('#weather-effects-container').empty();
-        const w = condition.toLowerCase();
-        const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
+   // =================================================================
+// 3. ANİMASYON VE EFEKT MOTORU (Kübra'nın Görevi - DÜZELTİLDİ)
+// =================================================================
 
-        // Eski arkaplanları temizle
-        $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
+function createWeatherEffects(condition, iconCode) {
+    const $c = $('#weather-effects-container').empty();
+    const w = condition.toLowerCase();
 
-        if (w.includes('rain')) {
-            $('body').addClass('rainy-bg');
-            for(let i=0; i<50; i++) {
-                $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s"></div>`);
-            }
-        } else if (w.includes('clear')) {
-            if (isNight) {
-                for(let i=0; i<50; i++) $c.append(`<div class="night-star" style="left:${Math.random()*100}vw; top:${Math.random()*60}vh"></div>`);
-            } else {
-                $('body').addClass('sunny-bg');
-                $c.append('<div class="sun-glow"></div>');
-            }
-        } else if (w.includes('cloud')) {
-            $('body').addClass('cloudy-bg');
+    // Eski arkaplanları temizle
+    $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
+
+    // A) YAĞMUR EFEKTİ
+    if (w.includes('rain')) {
+        $('body').addClass('rainy-bg');
+        for(let i=0; i<80; i++) {
+            $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s; animation-delay:${Math.random()}s"></div>`);
         }
+    } 
+    // B) GÜNEŞLİ / AÇIK GECE EFEKTİ
+    else if (w.includes('clear')) {
+        if (iconCode && iconCode.includes('n')) {
+            // Gece ise yıldızlar (isteğe bağlı eklenebilir)
+        } else {
+            $('body').addClass('sunny-bg');
+        }
+    } 
+    // C) BULUTLU
+    else if (w.includes('cloud')) {
+        $('body').addClass('cloudy-bg');
     }
+}
 
+// AY'IN GÖZÜKMESİ İÇİN: 258. satırdaki displayForecastToHTML fonksiyonunu bununla değiştir
+function displayForecastToHTML(dailyForecasts, cityName) {
+    const $container = $('#forecast-cards-container').empty();
+    $('#forecast-city-name').text(cityName).show();
+
+    dailyForecasts.forEach(day => {
+        let ikonHtml = '';
+        // Gece ('n' harfi) ve Hava Açık ('Clear') ise Ay koy
+        if (day.ikon && day.ikon.includes('n') && day.mainCond === 'Clear') {
+            ikonHtml = `<i class="bi bi-moon-stars-fill text-moon fs-1 mx-auto my-3"></i>`;
+        } else {
+            ikonHtml = `<img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" width="70">`;
+        }
+
+        $container.append(`
+            <div class="col">
+                <div class="card weather-card text-center p-3 h-100 glass-card" data-cond="${day.mainCond}">
+                    <h6>${day.tarih}</h6>
+                    ${ikonHtml}
+                    <div class="fw-bold">${day.enYuksek}°</div>
+                    <p class="small text-capitalize mb-0">${day.durum}</p>
+                </div>
+            </div>
+        `);
+    });
+}
 
     // =================================================================
     // 4. FAVORİ ŞEHİRLER YÖNETİMİ (Beyza & Zeynep)
