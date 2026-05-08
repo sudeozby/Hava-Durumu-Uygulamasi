@@ -1,147 +1,253 @@
 $(document).ready(function() {
     const apiKey = '5c03ce0373390aff630bcb6f7aac303b';
     let favorites = JSON.parse(localStorage.getItem('favoriteCities')) || [];
-    let fullForecastList = []; // Grafik için veriyi saklıyoruz
-    let myChart = null;
 
+    // Başlangıç Ayarları
     applyThemeByTime();
     renderFavorites();
 
-    // 1. TEMA DEĞİŞTİRME
-    $('#theme-toggle-btn').on('click', function() {
-        $('body').toggleClass('light-theme dark-theme');
-        const isDark = $('body').hasClass('dark-theme');
-        $(this).html(isDark ? '<i class="bi bi-sun-fill text-warning"></i> Aydınlık' : '<i class="bi bi-moon-stars-fill"></i> Karanlık');
-    });
-
+    // 1. TEMA AYARI (Sude)
     function applyThemeByTime() {
         const hour = new Date().getHours();
-        if (hour < 6 || hour >= 18) $('body').addClass('dark-theme').removeClass('light-theme');
+        const $body = $('body');
+        if (hour >= 6 && hour < 18) {
+            $body.removeClass('dark-theme').addClass('light-theme');
+        } else {
+            $body.removeClass('light-theme').addClass('dark-theme');
+        }
     }
 
-    // 2. PROFESYONEL BİLDİRİM (TOAST)
-    function notify(msg) {
-        if(!$('#custom-toast').length) $('body').append('<div id="custom-toast" class="toast-message"></div>');
-        $('#custom-toast').text(msg).addClass('show');
-        setTimeout(() => $('#custom-toast').removeClass('show'), 3000);
-    }
-
-    // 3. GRAFİK MOTORU
-    function drawChart(selectedDate) {
-        const filteredData = fullForecastList.filter(item => {
-            return new Date(item.dt * 1000).toLocaleDateString('tr-TR', { weekday: 'long' }) === selectedDate.split(',')[0];
-        });
-
-        const labels = filteredData.map(i => i.dt_txt.split(' ')[1].substring(0, 5));
-        const temps = filteredData.map(i => i.main.temp);
-
-        if (myChart) myChart.destroy();
-        const ctx = document.getElementById('tempChart').getContext('2d');
-        myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{ label: 'Sıcaklık (°C)', data: temps, borderColor: '#6c5ce7', tension: 0.4, fill: true, backgroundColor: 'rgba(108, 92, 231, 0.1)' }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-        $('#chart-section').fadeIn();
-    }
-
-    // 4. VERİ ÇEKME VE KART TIKLAMA
+    // 2. VERİ ÇEKME (Zeynep)
     function getFiveDayForecast(city) {
-        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric&lang=tr`;
-        $.get(url, function(data) {
-            fullForecastList = data.list; // Tüm veriyi sakla
-            const temizVeri = processForecastData(data.list);
-            displayForecast(temizVeri, data.city.name);
-            
-            // İlk günün efekti ve grafiği
-            createWeatherEffects(data.list[0].weather[0].main);
-            drawChart(temizVeri[0].tarih);
-            $('#add-to-fav-btn').show();
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+        
+        // Yükleniyor ibaresi
+        $('#get-weather-btn').text('Aranıyor...').prop('disabled', true);
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function(data) {
+                const temizVeri = processForecastData(data.list);
+                displayForecastToHTML(temizVeri, data.city.name);
+                
+                createWeatherEffects(data.list[0].weather[0].main); // Kübra'nın efektleri çalışır
+                $('#add-to-fav-btn').fadeIn(); // Favori butonunu göster
+            },
+            error: function() { 
+                alert("Şehir bulunamadı! Lütfen geçerli bir şehir adı girin."); 
+            },
+            complete: function() {
+                $('#get-weather-btn').text('Getir').prop('disabled', false);
+            }
         });
     }
 
-    function displayForecast(daily, cityName) {
-        const container = $('#forecast-cards-container').empty();
-        $('#forecast-city-name').text(cityName).show();
-        daily.forEach((day, idx) => {
-            container.append(`
+    function processForecastData(list) {
+        const daily = {};
+        list.forEach(item => {
+            const date = item.dt_txt.split(' ')[0];
+            if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [] };
+            daily[date].temps.push(item.main.temp);
+            daily[date].icons.push(item.weather[0].icon);
+            daily[date].desc.push(item.weather[0].description);
+        });
+        
+        return Object.keys(daily).slice(0, 5).map(date => ({
+            tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
+            enYuksek: Math.round(Math.max(...daily[date].temps)),
+            enDusuk: Math.round(Math.min(...daily[date].temps)),
+            durum: daily[date].desc[Math.floor(daily[date].desc.length / 2)], // Zeynep'in daha doğru olan ortalama bulma mantığı
+            ikon: daily[date].icons[Math.floor(daily[date].icons.length / 2)]
+        }));
+    }
+
+    function displayForecastToHTML(dailyForecasts, cityName) {
+        const $container = $('#forecast-cards-container');
+        $('#forecast-city-name').text(cityName + " İçin 5 Günlük Hava Tahmini").show();
+        $container.empty();
+        
+        dailyForecasts.forEach(day => {
+            $container.append(`
                 <div class="col">
-                    <div class="card weather-card text-center p-3 h-100 glass-card border-0 ${idx===0?'active':''}" data-date="${day.tarih}" data-cond="${day.mainCond}">
-                        <h6 class="small">${day.tarih}</h6>
-                        <img src="https://openweathermap.org/img/wn/${day.icon}@2x.png" class="mx-auto" width="60">
-                        <div class="fw-bold">${day.enYuksek}°</div>
-                        <p class="small mb-0 text-capitalize">${day.durum}</p>
+                    <div class="card weather-card text-center p-3 h-100 shadow-sm">
+                        <h5>${day.tarih}</h5>
+                        <img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" style="width:70px">
+                        <div class="temp-display" style="font-size: 1.5rem; font-weight:bold;">${day.enYuksek}° <span style="font-size:1rem; opacity:0.6">/ ${day.enDusuk}°</span></div>
+                        <p class="text-capitalize mb-0">${day.durum}</p>
                     </div>
                 </div>
             `);
         });
     }
 
-    // KART TIKLAMA OLAYI
-    $(document).on('click', '.weather-card', function() {
-        $('.weather-card').removeClass('active');
-        $(this).addClass('active');
-        drawChart($(this).data('date'));
-        createWeatherEffects($(this).data('cond'));
-        notify("Hava durumu detayları güncellendi.");
+   // 3. FAVORİLER (Kübra, Beyza & Zeynep)
+    function renderFavorites() {
+        const $container = $('#favorite-cities-container');
+        $container.empty();
+        if (favorites.length === 0) {
+            $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
+            return;
+        }
+
+        favorites.forEach(city => {
+            // Her kart için benzersiz bir ID oluşturuyoruz (İçine dereceyi basabilmek için)
+            const cardId = `fav-card-${city.replace(/\s+/g, '-')}`;
+
+            $container.append(`
+                <div class="col">
+                    <div class="card p-3 shadow-sm fav-card" data-city="${city}" style="cursor:pointer; border-left: 5px solid #0d6efd; transition: transform 0.2s;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <span style="font-weight:bold; font-size:1.1rem;">${city}</span>
+                            <button class="btn btn-danger btn-sm remove-fav" data-city="${city}">Sil</button>
+                        </div>
+                        <div id="${cardId}" class="mt-2 text-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Kuryeyi bu şehir için anlık veriyi getirmesi adına gönderiyoruz
+            getCurrentWeatherForFavorite(city, `#${cardId}`);
+        });
+    }
+
+    // YENİ: Sadece favori kartlarına anlık sıcaklık ve ikon çeken motor
+    function getCurrentWeatherForFavorite(city, targetElementId) {
+        // API'den "weather" (anlık) verisi istiyoruz
+        const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+
+        $.ajax({
+            url: currentUrl,
+            method: 'GET',
+            success: function(data) {
+                const temp = Math.round(data.main.temp);
+                const desc = data.weather[0].description;
+                const icon = data.weather[0].icon;
+                
+                // Veri gelince dönen animasyonu silip yerine dereceyi ve ikonu basıyoruz
+                $(targetElementId).html(`
+                    <div class="d-flex align-items-center mt-1">
+                        <img src="https://openweathermap.org/img/wn/${icon}.png" style="width:50px; margin-left:-10px;">
+                        <div class="ms-1 text-start">
+                            <span style="font-size:1.5rem; font-weight:bold; line-height:1;">${temp}°</span>
+                            <div class="text-capitalize text-muted" style="font-size:0.85rem;">${desc}</div>
+                        </div>
+                    </div>
+                `);
+            },
+            error: function() {
+                $(targetElementId).html('<small class="text-danger">Veri alınamadı</small>');
+            }
+        });
+    }
+
+  // Favori Silme
+    $(document).on('click', '.remove-fav', function(e) {
+        e.stopPropagation(); // ARAMAYI DURDURUR! Sadece silme işlemini yapar.
+        const city = $(this).data('city');
+        favorites = favorites.filter(c => c !== city);
+        localStorage.setItem('favoriteCities', JSON.stringify(favorites));
+        renderFavorites();
     });
 
-    // Favori İşlemleri
-    $('#add-to-fav-btn').click(function() {
-        const city = $('#forecast-city-name').text();
-        if(!favorites.includes(city)) {
+    // Favori Şehre (Karta) Tıklayınca Hava Durumunu Getirme
+    $(document).on('click', '.fav-card', function() {
+        const city = $(this).data('city'); // Tıklanan kartın içindeki şehri al
+        getFiveDayForecast(city);          // O şehri motora gönder
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Sayfayı yukarı kaydır
+    });
+
+    // Favoriye Ekleme (LİMİT EKLENDİ)
+    $('#add-to-fav-btn').on('click', function() {
+        const city = $('#forecast-city-name').text().split(" İçin")[0];
+        
+        if (city && !favorites.includes(city)) {
+            if (favorites.length >= 6) {
+                alert("Maksimum 6 favori şehir ekleyebilirsiniz.");
+                return;
+            }
             favorites.push(city);
             localStorage.setItem('favoriteCities', JSON.stringify(favorites));
             renderFavorites();
-            notify(`${city} Favorilere Eklendi! ✨`);
+            alert(`${city} favorilere eklendi!`);
+        } else if (favorites.includes(city)) {
+            alert(`${city} zaten favorilerinizde ekli.`);
         }
     });
 
-    // Arama Tetikleyici
-    $('#get-weather-btn').click(() => {
-        const city = $('#city-input').val();
-        if(city) getForecast(city);
+    // 4. BUTONLAR VE ARAMA
+    $('#get-weather-btn').on('click', function() {
+        const city = $('#city-input').val().trim();
+        if (city) getFiveDayForecast(city);
     });
 
-    // ... (Zeynep'in processForecastData ve renderFavorites fonksiyonlarını buraya ekle)
+    $('#city-input').keypress(function(event) {
+        if (event.which === 13) { 
+            event.preventDefault(); 
+            $('#get-weather-btn').click(); 
+        }
+    });
 
-    // KÜBRA NIN EFEKTLERİ
+    // ==========================================
+    // KÜBRA'NIN EFEKTLERİ (GERİ GETİRİLDİ)
+    // ==========================================
+    if($('#weather-effects-container').length === 0) {
+        $('body').prepend('<div id="weather-effects-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none;"></div>');
+    }
+
+<HEAD
+    // KÜBRA NIN EFEKTLERİ> 8d3e9b2384439a2ff54d9389ccf0087b43f56a64
     function createWeatherEffects(condition) {
-        const $c = $('#weather-effects-container').empty();
-        const w = condition.toLowerCase();
-        if (w.includes('rain')) {
-            for(let i=0; i<30; i++) $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw"></div>`);
-        } else if (w.includes('clear')) {
-            $c.append('<div class="sun-glow"></div>');
-        } else if (w.includes('thunder') || w.includes('storm')) {
-            $c.append('<div class="lightning-flash"></div>');
+        const $container = $('#weather-effects-container');
+        $container.empty(); 
+        const weather = condition.toLowerCase();
+        
+        const hour = new Date().getHours();
+        const isNight = (hour >= 18 || hour < 6);
+
+        if (weather.includes('thunder') || weather.includes('storm')) {
+            $container.append('<div class="lightning-flash"></div>');
+            for (let i = 0; i < 40; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 0.8 + 0.2;
+                $container.append(`<div class="rain-drop" style="left:${left}vw; animation-duration:${duration}s"></div>`);
+            }
+        }
+        else if (weather.includes('rain')) {
+            for (let i = 0; i < 30; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 1 + 0.5;
+                $container.append(`<div class="rain-drop" style="left:${left}vw; animation-duration:${duration}s"></div>`);
+            }
+        } 
+        else if (weather.includes('snow')) {
+            for (let i = 0; i < 40; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 3 + 2;
+                $container.append(`<div class="snow-flake" style="left:${left}vw; animation-duration:${duration}s">❄</div>`);
+            }
+        }
+        else if (weather.includes('cloud')) {
+            for (let i = 0; i < 5; i++) {
+                let top = Math.random() * 50;
+                let size = Math.random() * 200 + 100;
+                let duration = Math.random() * 20 + 10;
+                $container.append(`<div class="cloud-particle" style="top:${top}%; width:${size}px; height:${size/2}px; animation-duration:${duration}s"></div>`);
+            }
+        }
+        else if (weather.includes('clear')) {
+            if (isNight) {
+                for (let i = 0; i < 50; i++) {
+                    let left = Math.random() * 100;
+                    let top = Math.random() * 60; 
+                    let delay = Math.random() * 2;
+                    $container.append(`<div class="night-star" style="left:${left}vw; top:${top}vh; animation-delay:${delay}s"></div>`);
+                }
+            } else {
+                $container.append('<div class="sun-glow"></div>');
+            }
         }
     }
-
-    function processForecastData(list) {
-        const daily = {};
-        list.forEach(i => {
-            const date = i.dt_txt.split(' ')[0];
-            if (!daily[date]) daily[date] = i;
-        });
-        return Object.values(daily).slice(0, 5).map(i => ({
-            tarih: new Date(i.dt * 1000).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
-            enYuksek: Math.round(i.main.temp),
-            durum: i.weather[0].description,
-            icon: i.weather[0].icon,
-            mainCond: i.weather[0].main
-        }));
-    }
-
-    function renderFavorites() {
-        const container = $('#favorite-cities-container').empty();
-        favorites.forEach(city => {
-            container.append(`<div class="col"><div class="card p-3 glass-card fav-card" onclick="getForecast('${city}')">${city}</div></div>`);
-        });
-    }
-
-    window.getForecast = getFiveDayForecast; // Favori tıklaması için
 });
