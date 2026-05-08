@@ -48,16 +48,14 @@ body {
 .weather-card.active { border: 2px solid #6c5ce7 !important; }
 
 /* KÜBRA'NIN EFEKTLERİ */
-#weather-effects-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-@keyframes rain { 0% { transform: translateY(-10vh); } 100% { transform: translateY(100vh); } }
-.rain-drop { position: fixed; width: 2px; height: 15px; background: rgba(255,255,255,0.4); animation: rain linear infinite; }
-.sun-glow { position: fixed; top: -10%; right: -10%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(255,235,59,0.2) 0%, transparent 70%); }
-@keyframes lightning { 0%, 90%, 100% { opacity: 0; } 92% { opacity: 0.5; background: white; } }
-.lightning-flash { position: fixed; top:0; left:0; width:100%; height:100%; animation: lightning 6s infinite; }
-/* Karanlık modda input yazı rengi ve arka planı */
-.dark-theme .form-control {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
+#weather-effects-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999 !important; /* Sayfadaki her şeyin üstüne çıkardık */
+    pointer-events: none; /* Üstte olsa bile butonlara tıklamanı engellemez */
 }
 
 /* Input içindeki placeholder (ipucu) yazısı rengi */
@@ -111,16 +109,36 @@ body {
 .light-theme.cloudy-bg { background: linear-gradient(to bottom, #eeeeee, #ffffff) !important; }
 .dark-theme.cloudy-bg { background: linear-gradient(to bottom, #334155, #0f172a) !important; }
 /* 3. YAĞMUR DAMLASI GÖRÜNÜRLÜĞÜ */
+/* YAĞMUR DAMLASI - HEM AYDINLIK HEM KARANLIK MOD UYUMLU */
+/* YAĞMUR DAMLASI - GARANTİLİ GÖRÜNÜRLÜK */
+/* Genel Damla Yapısı */
+/* =================================================================
+   PARTICULE COLOR CONFIGURATION: Mavi Yağmur Filtresi
+   Açıklama: Atmosferik dikey partiküllerin RGB spektrumunu 
+   mavi tonlara (Cerulean Blue) sabitler.
+   ================================================================= */
+
 .rain-drop {
     position: fixed;
-    width: 2px;
-    height: 15px;
-    background: rgba(255, 255, 255, 0.6);
-    top: -10px;
-    z-index: 1000;
-    pointer-events: none;
+    width: 2.5px !important;
+    height: 20px !important;
     animation: rain linear infinite;
+    /* KARANLIK MOD: Parlak mavi tonu (Aqua Blue) */
+    background: rgba(0, 200, 255, 0.7) !important; 
+    z-index: 9999;
 }
+
+/* KOŞULLU RENDER: AYDINLIK MOD (Light Theme) */
+.light-theme .rain-drop {
+    /* Spektral Kontrast: Beyaz arka planda görünürlüğü artıran Koyu Mavi */
+    background: #004a99 !important; 
+    opacity: 0.8 !important;
+    /* Kromatik Derinlik: Damlaların etrafına hafif gölge ekler */
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* AYDINLIK MODDA (LIGHT-THEME) YAĞMUR AYARI */
+
 
 @keyframes rain {
     0% { transform: translateY(0vh); }
