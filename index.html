@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hava Durumu Merkezi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme"> <header class="py-3 shadow-sm">
+        <div class="container">
+            <h1>Hava Durumu Merkezi</h1>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <div class="card p-3 mb-4 shadow-sm">
+            <h2 class="h4 mb-3">Şehir Ara</h2>
+            <div class="input-group">
+                <input type="text" class="form-control" id="city-input" placeholder="Şehir adı girin...">
+                <button class="btn btn-primary" id="get-weather-btn">Getir</button>
+            </div>
+        </div>
+
+        <div id="forecast-result-container" class="mb-4">
+            <h3 id="forecast-city-name" class="text-center mb-3" style="display: none;"></h3>
+            <div id="forecast-cards-container" class="row row-cols-1 row-cols-md-5 g-3"></div>
+        </div>
+
+        <h2 class="h4 mb-3">Favori Şehirler</h2>
+        <div id="favorite-cities-container" class="row row-cols-1 row-cols-md-4 g-3">
+            <p class="text-center w-100">Henüz favori eklenmedi.</p>
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
