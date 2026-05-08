@@ -34,7 +34,7 @@ body {
     margin: 0;
 }
 
-<<<<<<< HEAD
+
 header {
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--card-border);
@@ -108,7 +108,8 @@ footer {
     text-align: center;
     border-top: 1px solid var(--card-border);
     margin-top: 50px;
-=======
+}
+
 /* Diğer detaylı stilleri Beyza buraya ekleyecek */
 /* --- KÜBRA'NIN GÖREV ALANI: EFEKT ANİMASYONLARI --- */
 
@@ -132,7 +133,7 @@ footer {
 @keyframes float {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100vw); }
-}
+}g
 
 .cloud-particle {
     position: fixed;
@@ -158,7 +159,7 @@ footer {
 @keyframes snow {
     0% { transform: translateY(-10vh) rotate(0deg); }
     100% { transform: translateY(100vh) rotate(360deg); }
-}
+}aa
 
 .snow-flake {
     position: fixed;
@@ -217,5 +218,5 @@ footer {
     backdrop-filter: blur(5px);
     z-index: -1;
     pointer-events: none;
->>>>>>> 2055ac4c658db02fbcd809fc222ac8f9dcfe6068
+
 }
