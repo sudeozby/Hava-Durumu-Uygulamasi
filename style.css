@@ -189,3 +189,27 @@ body {
 .dark-theme .fav-card span {
     color: #ffffff !important;
 }
+
+/* SABAH MODUNDA (LIGHT THEME) KUTULARA ÇERÇEVE VE GÖLGE EKLENTİSİ */
+
+/* Tüm kartlara (Şehir Ara, 5 Günlük Tahmin, Favoriler) belirgin çerçeve ve gölge */
+.light-theme .card,
+.light-theme .glass-card,
+.light-theme .weather-card,
+.light-theme .fav-card {
+    border: 2px solid #ced4da !important; /* Daha kalın ve belirgin bir gri çerçeve */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important; /* Daha güçlü bir gölge */
+}
+
+/* Kartların üzerine fareyle gelince gölgeyi iyice belirginleştir */
+.light-theme .weather-card:hover,
+.light-theme .fav-card:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.20) !important; 
+    border-color: #adb5bd !important; /* Çerçeve biraz daha koyulaşsın */
+}
+
+/* Aydınlık modda favori kartının üzerine gelince arka planın siyah olmasını engelle */
+.light-theme .fav-card:hover {
+    background: #ffffff !important; 
+    color: #212529 !important; 
+}
