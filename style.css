@@ -58,7 +58,6 @@ body {
     pointer-events: none; /* Üstte olsa bile butonlara tıklamanı engellemez */
 }
 
-
 /* Input içindeki placeholder (ipucu) yazısı rengi */
 .dark-theme .form-control::placeholder {
     color: rgba(255, 255, 255, 0.5);
@@ -113,27 +112,33 @@ body {
 /* YAĞMUR DAMLASI - HEM AYDINLIK HEM KARANLIK MOD UYUMLU */
 /* YAĞMUR DAMLASI - GARANTİLİ GÖRÜNÜRLÜK */
 /* Genel Damla Yapısı */
+/* =================================================================
+   PARTICULE COLOR CONFIGURATION: Mavi Yağmur Filtresi
+   Açıklama: Atmosferik dikey partiküllerin RGB spektrumunu 
+   mavi tonlara (Cerulean Blue) sabitler.
+   ================================================================= */
+
 .rain-drop {
     position: fixed;
-    width: 3px !important; /* Biraz kalınlaştırdık */
-    height: 25px !important; /* Biraz uzattık */
-    background: rgba(255, 255, 255, 0.8); /* Karanlık modda beyaz */
+    width: 2.5px !important;
+    height: 20px !important;
     animation: rain linear infinite;
+    /* KARANLIK MOD: Parlak mavi tonu (Aqua Blue) */
+    background: rgba(0, 200, 255, 0.7) !important; 
+    z-index: 9999;
 }
 
-/* AYDINLIK MODDA ÖZEL AYAR (İşte Sihir Burada) */
+/* KOŞULLU RENDER: AYDINLIK MOD (Light Theme) */
 .light-theme .rain-drop {
-    background: #104e8b !important; /* Çok koyu ve net bir lacivert */
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Beyazda parlaması için hafif gölge */
-    opacity: 1 !important; /* Saydamlığı tamamen kapattık, tam görünür yaptık */
+    /* Spektral Kontrast: Beyaz arka planda görünürlüğü artıran Koyu Mavi */
+    background: #004a99 !important; 
+    opacity: 0.8 !important;
+    /* Kromatik Derinlik: Damlaların etrafına hafif gölge ekler */
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* AYDINLIK MODDA (LIGHT-THEME) YAĞMUR AYARI */
-.light-theme .rain-drop {
-    background: #004a99 !important; /* Koyu canlı bir mavi yaptık */
-    opacity: 0.7 !important;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2); /* Hafif gölge ekledik ki beyazın üstünde patlasın */
-}
+
 
 @keyframes rain {
     0% { transform: translateY(0vh); }
@@ -184,18 +189,36 @@ body {
 .dark-theme .fav-card span {
     color: #ffffff !important;
 }
-/* --- style.css Sonuna Ekle --- */
 
-/* Ay İkonu Özel Stili */
-.text-moon {
-    /* Hafif parlayan, soluk sarı/beyaz bir renk (Aydınlık Mod Optimize) */
-    color: #e0e0e0;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3)); 
-    display: block; /* Ortalamak için */
+/* SABAH MODUNDA (LIGHT THEME) KUTULARA ÇERÇEVE VE GÖLGE EKLENTİSİ */
+
+/* Tüm kartlara (Şehir Ara, 5 Günlük Tahmin, Favoriler) belirgin çerçeve ve gölge */
+.light-theme .card,
+.light-theme .glass-card,
+.light-theme .weather-card,
+.light-theme .fav-card {
+    border: 2px solid #ced4da !important; /* Daha kalın ve belirgin bir gri çerçeve */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important; /* Daha güçlü bir gölge */
 }
 
-/* Karanlık Modda Ay İkonu Daha Belirgin Olsun */
-.dark-theme .text-moon {
-    color: #f1c40f !important; /* Gerçek, parlak bir altın sarısı */
-    filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.5)); /* Karanlıkta daha güçlü bir parlama (glow) */
+/* Kartların üzerine fareyle gelince gölgeyi iyice belirginleştir */
+.light-theme .weather-card:hover,
+.light-theme .fav-card:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.20) !important; 
+    border-color: #adb5bd !important; /* Çerçeve biraz daha koyulaşsın */
+}
+
+/* Aydınlık modda favori kartının üzerine gelince arka planın siyah olmasını engelle */
+.light-theme .fav-card:hover {
+    background: #ffffff !important; 
+    color: #212529 !important; 
+}
+/* ==========================================
+   ÜST MENÜ KODU
+   ========================================== */
+header.glass-header, header.sticky-top {
+    background-color: var(--bg-color) !important; /* Arkasını duvar gibi kapatır, şeffaflığı ezer */
+    z-index: 9990 !important; /* Sayfadaki TÜM yazı, kart ve butonların üstüne zorla çıkartır */
+    position: sticky !important;
+    top: 0 !important;
 }
