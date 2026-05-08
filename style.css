@@ -1,24 +1,110 @@
-/* Sude'nin kurduğu tema altyapısı */
+/* 1. TEMA ALTYAPISI (Sude & Beyza Ortak) */
 :root {
     --bg-color: #ffffff;
     --text-color: #212529;
+    --accent-color: #0d6efd;
 }
 
 .light-theme {
     --bg-color: #f8f9fa;
     --text-color: #212529;
+    --card-bg: #ffffff;
+    --card-border: #dee2e6;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .dark-theme {
-    --bg-color: #212529;
-    --text-color: #f8f9fa;
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --card-border: #333333;
+    --shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* 2. GENEL AYARLAR */
+* {
+    transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Roboto', sans-serif;
-    transition: background-color 0.5s ease, color 0.5s ease;
+    min-height: 100vh;
+    margin: 0;
 }
 
-/* Diğer detaylı stilleri Beyza buraya ekleyecek */
+header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 2rem;
+}
+
+/* 3. KART TASARIMI (BEYZA) */
+.card {
+    background-color: var(--card-bg) !important; /* Bootstrap'i ezmek için */
+    color: var(--text-color);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 20px;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+/* 4. ARAMA BÖLÜMÜ */
+.form-control {
+    border-radius: 12px 0 0 12px !important;
+    border: 2px solid var(--card-border);
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    padding: 12px;
+}
+
+#get-weather-btn {
+    border-radius: 0 12px 12px 0 !important;
+    font-weight: bold;
+    padding: 0 25px;
+}
+
+/* 5. HAVA DURUMUNA ÖZEL RENKLER */
+.weather-card.sunny {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%) !important;
+    color: #fff !important;
+    border: none;
+}
+
+.weather-card.rainy {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+    color: #fff !important;
+    border: none;
+}
+
+.weather-card.cloudy {
+    background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%) !important;
+    color: #fff !important;
+    border: none;
+}
+
+/* 6. TAHMİN KARTLARI DETAYI */
+#forecast-cards-container .card {
+    text-align: center;
+    padding: 15px;
+}
+
+.temp-display {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+footer {
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid var(--card-border);
+    margin-top: 50px;
+}
