@@ -49,34 +49,191 @@ $(document).ready(function() {
     // =================================================================
     
     // API'den 5 günlük hava durumu verisini çeken ana fonksiyon
-    function getFiveDayForecast(city) {
-        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+    // --- script.js İçinde getFiveDayForecast Fonksiyonunu Bul ve Güncelle ---
+
+// 2. VERİ ÇEKME VE İŞLEME MOTORU (Zeynep)
+function getFiveDayForecast(city) {
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+    
+    // Veri gelirken butonu pasifleştir
+    $('#get-weather-btn').text('Aranıyor...').prop('disabled', true);
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(data) {
+            // Veriyi temizle, HTML'e bas ve efektleri tetikle
+            const temizVeri = processForecastData(data.list);
+            displayForecastToHTML(temizVeri, data.city.name);
+            
+            // Burası önemli: Efektleri tetiklerken ikon kodunu da gönder
+            createWeatherEffects(data.list[0].weather[0].main, temizVeri[0].ikon); 
+            
+            $('#add-to-fav-btn').fadeIn(); // Favoriye ekle butonunu göster
+        },
+        error: function() { 
+            // Amatör ALERT yerine profesyonel NOTIFY kullan
+            showNotify("Şehir bulunamadı! Geçerli bir şehir girin.", "info"); 
+        },
+        complete: function() {
+            // İşlem bitince butonu eski haline getir
+            $('#get-weather-btn').text('Göster').prop('disabled', false);
+        }
+    });
+}
+
+
+// --- processForecastData Fonksiyonunda İkon Belirleme Mantığını Değiştir ---
+
+// 40 adet 3 saatlik veriyi, 5 günlük net bir özete çevirir
+function processForecastData(list) {
+    const daily = {};
+    
+    // Gelen verileri tarihlere göre torbalara ayırır
+    list.forEach(item => {
+        const date = item.dt_txt.split(' ')[0];
+        if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [], mainCond: [] };
         
-        // Veri gelirken butonu pasifleştir
-        $('#get-weather-btn').text('Aranıyor...').prop('disabled', true);
+        daily[date].temps.push(item.main.temp);
+        daily[date].icons.push(item.weather[0].icon);
+        daily[date].desc.push(item.weather[0].description);
+        daily[date].mainCond.push(item.weather[0].main);
+    });
+    
+    // Her torbadaki en yüksek/düşük sıcaklıkları bularak son listeyi oluşturur
+    return Object.keys(daily).slice(0, 5).map(date => {
+        const rawIcon = daily[date].icons[0]; // API'den gelen ham ikon kodu (01d, 01n vb.)
+        let finalIconHtml;
 
-        $.ajax({
-            url: url,
-            method: 'GET',
-            success: function(data) {
-                // Veriyi temizle, HTML'e bas ve efektleri tetikle
-                const temizVeri = processForecastData(data.list);
-                displayForecastToHTML(temizVeri, data.city.name);
-                createWeatherEffects(data.list[0].weather[0].main); 
-                
-                currentIcon = temizVeri[0].ikon; // İkonu hafızaya al
-                $('#add-to-fav-btn').fadeIn(); // Favoriye ekle butonunu göster
-            },
-            error: function() { 
-                showNotification("Şehir bulunamadı! Geçerli bir şehir girin.", "info"); 
-            },
-            complete: function() {
-                // İşlem bitince butonu eski haline getir
-                $('#get-weather-btn').text('Göster').prop('disabled', false);
-            }
-        });
-    }
+        // --- BU KISMI DİKKATLİCE YAPIŞTIR (İkon Eşleştirme) ---
+        // Gündüz Açık (01d) -> Güneş İkonu (API'den imaj)
+        if (rawIcon === '01d') {
+            finalIconHtml = `<img src="https://openweathermap.org/img/wn/01d@2x.png" class="mx-auto" width="70" alt="Güneşli">`;
+        } 
+        // Geceleri Açık (01n) veya Hafif Bulutlu Gece (02n) -> Hilal (Bootstrap İkonu)
+        else if (rawIcon === '01n' || rawIcon === '02n') {
+            finalIconHtml = `<i class="bi bi-moon-stars-fill text-moon fs-1 mx-auto my-3" title="Açık Gece"></i>`;
+        } 
+        // Diğer durumlar (Yağmur, Kar, Çok Bulutlu vb.) -> API'den gelen varsayılan imajı kullan
+        else {
+            finalIconHtml = `<img src="https://openweathermap.org/img/wn/${rawIcon}@2x.png" class="mx-auto" width="70" alt="${daily[date].desc[0]}">`;
+        }
+        // -----------------------------------------------------
 
+        return {
+            tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
+            enYuksek: Math.round(Math.max(...daily[date].temps)),
+            durum: daily[date].desc[0],
+            ikonHtml: finalIconHtml, // Artık ham kodu değil, hazır HTML'i gönderiyoruz
+            mainCond: daily[date].mainCond[0]
+        };
+    });
+}
+
+
+// --- displayForecastToHTML Fonksiyonunu HTML Şablonunu Güncelle ---
+
+// Temizlenmiş 5 günlük listeyi arayüzdeki (HTML) kartlara dönüştürür
+// 2. VERİ ÇEKME VE İŞLEME MOTORU (Zeynep)
+function getFiveDayForecast(city) {
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+    
+    // Veri gelirken butonu pasifleştir
+    $('#get-weather-btn').text('Aranıyor...').prop('disabled', true);
+
+    $.ajax({
+        url: url,
+        method: 'GET',
+        success: function(data) {
+            // Veriyi temizle, HTML'e bas ve efektleri tetikle
+            const temizVeri = processForecastData(data.list);
+            displayForecastToHTML(temizVeri, data.city.name);
+            
+            // Burası önemli: Efektleri tetiklerken ikon kodunu da gönder
+            createWeatherEffects(data.list[0].weather[0].main, temizVeri[0].ikon); 
+            
+            $('#add-to-fav-btn').fadeIn(); // Favoriye ekle butonunu göster
+        },
+        error: function() { 
+            // Amatör ALERT yerine profesyonel NOTIFY kullan
+            showNotify("Şehir bulunamadı! Geçerli bir şehir girin.", "info"); 
+        },
+        complete: function() {
+            // İşlem bitince butonu eski haline getir
+            $('#get-weather-btn').text('Göster').prop('disabled', false);
+        }
+    });
+}
+
+
+// --- processForecastData Fonksiyonunda İkon Belirleme Mantığını Değiştir ---
+
+// 40 adet 3 saatlik veriyi, 5 günlük net bir özete çevirir
+function processForecastData(list) {
+    const daily = {};
+    
+    // Gelen verileri tarihlere göre torbalara ayırır
+    list.forEach(item => {
+        const date = item.dt_txt.split(' ')[0];
+        if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [], mainCond: [] };
+        
+        daily[date].temps.push(item.main.temp);
+        daily[date].icons.push(item.weather[0].icon);
+        daily[date].desc.push(item.weather[0].description);
+        daily[date].mainCond.push(item.weather[0].main);
+    });
+    
+    // Her torbadaki en yüksek/düşük sıcaklıkları bularak son listeyi oluşturur
+    return Object.keys(daily).slice(0, 5).map(date => {
+        const rawIcon = daily[date].icons[0]; // API'den gelen ham ikon kodu (01d, 01n vb.)
+        let finalIconHtml;
+
+        // --- BU KISMI DİKKATLİCE YAPIŞTIR (İkon Eşleştirme) ---
+        // Gündüz Açık (01d) -> Güneş İkonu (API'den imaj)
+        if (rawIcon === '01d') {
+            finalIconHtml = `<img src="https://openweathermap.org/img/wn/01d@2x.png" class="mx-auto" width="70" alt="Güneşli">`;
+        } 
+        // Geceleri Açık (01n) veya Hafif Bulutlu Gece (02n) -> Hilal (Bootstrap İkonu)
+        else if (rawIcon === '01n' || rawIcon === '02n') {
+            finalIconHtml = `<i class="bi bi-moon-stars-fill text-moon fs-1 mx-auto my-3" title="Açık Gece"></i>`;
+        } 
+        // Diğer durumlar (Yağmur, Kar, Çok Bulutlu vb.) -> API'den gelen varsayılan imajı kullan
+        else {
+            finalIconHtml = `<img src="https://openweathermap.org/img/wn/${rawIcon}@2x.png" class="mx-auto" width="70" alt="${daily[date].desc[0]}">`;
+        }
+        // -----------------------------------------------------
+
+        return {
+            tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
+            enYuksek: Math.round(Math.max(...daily[date].temps)),
+            durum: daily[date].desc[0],
+            ikonHtml: finalIconHtml, // Artık ham kodu değil, hazır HTML'i gönderiyoruz
+            mainCond: daily[date].mainCond[0]
+        };
+    });
+}
+
+
+// --- displayForecastToHTML Fonksiyonunu HTML Şablonunu Güncelle ---
+
+// Temizlenmiş 5 günlük listeyi arayüzdeki (HTML) kartlara dönüştürür
+function displayForecastToHTML(dailyForecasts, cityName) {
+    const $container = $('#forecast-cards-container').empty();
+    $('#forecast-city-name').text(cityName).show();
+    
+    dailyForecasts.forEach(day => {
+        $container.append(`
+            <div class="col">
+                <div class="card weather-card text-center p-3 h-100 glass-card border-0" data-cond="${day.mainCond}">
+                    <h6>${day.tarih}</h6>
+                    ${day.ikonHtml} 
+                    <div class="fw-bold">${day.enYuksek}°</div>
+                    <p class="small text-capitalize mb-0">${day.durum}</p>
+                </div>
+            </div>
+        `);
+    });
+}
     // 40 adet 3 saatlik veriyi, 5 günlük net bir özete çevirir
     function processForecastData(list) {
         const daily = {};
