@@ -1,5 +1,8 @@
 $(document).ready(function() {
+    
+    // ==========================================
     // SUDE'NİN GÖREVİ: Saate göre otomatik tema değişimi
+    // ==========================================
     function applyThemeByTime() {
         const hour = new Date().getHours();
         const $body = $('body');
@@ -16,36 +19,30 @@ $(document).ready(function() {
 
     applyThemeByTime();
 
-    // ZEYNEP VE KÜBRA BURADAN DEVAM EDECEK:
-    // Zeynep: API istekleri için buraya fonksiyonlar yazacak.
-    // Kübra: Favori ekleme butonları için buraya kodlar ekleyecek.
-    // --- ZEYNEP'İN KODLARI BAŞLANGIÇ ---
-    
-    // ADIM 1: Gerekli API bilgileri
+    // ==========================================
+    // ZEYNEP'İN GÖREVİ: API Veri Çekme ve Süzme Motoru
+    // ==========================================
     const apiKey = '5c03ce0373390aff630bcb6f7aac303b'; 
     const forecastApiUrlBase = 'https://api.openweathermap.org/data/2.5/forecast';
     
-    // ADIM 2: Gelen 40 verilik karmaşık listeyi 5 günlük net özete çeviren algoritma
     function processForecastData(forecastList) {
         const dailyData = {};
         
-        // Gelen listeyi tarihlere göre grupluyoruz
         forecastList.forEach(item => {
-            const date = item.dt_txt.split(' ')[0]; // Sadece tarihi alır (örn: "2025-05-18")
+            const date = item.dt_txt.split(' ')[0]; 
             if (!dailyData[date]) {
                 dailyData[date] = { temps: [], weatherDescriptions: [] };
             }
-            dailyData[date].temps.push(item.main.temp); // O günkü tüm 3 saatlik sıcaklıkları biriktir
+            dailyData[date].temps.push(item.main.temp); 
             dailyData[date].weatherDescriptions.push(item.weather[0].description);
         });
 
         const processedDailyArray = [];
         
-        // Her gün için en düşük ve en yüksek sıcaklığı hesaplıyoruz
         for (const date in dailyData) {
             const day = dailyData[date];
-            const minTemp = Math.min(...day.temps); // O günün en düşük sıcaklığı
-            const maxTemp = Math.max(...day.temps); // O günün en yüksek sıcaklığı
+            const minTemp = Math.min(...day.temps); 
+            const maxTemp = Math.max(...day.temps); 
             const description = day.weatherDescriptions[Math.floor(day.weatherDescriptions.length / 2)]; 
 
             processedDailyArray.push({
@@ -56,28 +53,26 @@ $(document).ready(function() {
             });
         }
         
-        // İlk 5 günü geri döndür
         return processedDailyArray.slice(0, 5);
     }
 
-    // ADIM 3: Belirli bir şehir için API'den veriyi çeken fonksiyon
     function getFiveDayForecastForCity(city) {
         console.log(`Motor Çalışıyor: ${city} için hava durumu aranıyor...`);
         
         const requestUrl = `${forecastApiUrlBase}?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
 
-        // jQuery AJAX ile API'ye bağlanıyoruz
         $.ajax({
             url: requestUrl,
             method: 'GET',
             success: function(data) {
                 console.log("Ham Veri Geldi! İçinde 40 tane 3 saatlik tahmin var:", data);
-                
-                // Gelen karmaşık veriyi kendi fonksiyonumuzla temizliyoruz
                 const temizlenmisVeri = processForecastData(data.list);
                 
                 console.log(`İşte ${city} için temizlenmiş 5 GÜNLÜK ÖZET:`);
-                console.table(temizlenmisVeri); // Konsolda tablo şeklinde güzelce göster
+                console.table(temizlenmisVeri); 
+                
+                // İLERİDE BURADA KÜBRA'NIN EFEKTİNİ TETİKLEYECEĞİZ
+                // Örn: createWeatherEffects(data.list[0].weather[0].main);
             },
             error: function(jqXHR) {
                 if (jqXHR.status === 404) {
@@ -89,9 +84,71 @@ $(document).ready(function() {
         });
     }
 
-    // ADIM 4: Sistemi test etmek için fonksiyonu manuel çalıştırıyoruz
-    // İleride burayı HTML'deki "Getir" butonuna tıklanınca çalışacak şekilde değiştireceğiz.
+    // Sistemin test kodu
     getFiveDayForecastForCity('Ankara');
 
-    // --- ZEYNEP'İN KODLARI BİTİŞ ---
+    // ==========================================
+    // KÜBRA'NIN GÖREVİ: Dinamik Hava Durumu Efektleri
+    // ==========================================
+    function createWeatherEffects(condition) {
+        const $container = $('#weather-effects-container');
+        
+        // Yeni bir şehre tıklandığında önceki şehrin efektlerini temizle
+        $container.empty(); 
+
+        // API'den gelen durumu küçük harfe çevir
+        const weather = condition.toLowerCase();
+
+        if (weather.includes('rain')) {
+            // Yağmurlu
+            for (let i = 0; i < 30; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 1 + 0.5;
+                $container.append(`<div class="rain-drop" style="left:${left}vw; animation-duration:${duration}s"></div>`);
+            }
+        } 
+        else if (weather.includes('cloud')) {
+            // Bulutlu
+            for (let i = 0; i < 5; i++) {
+                let top = Math.random() * 50;
+                let size = Math.random() * 200 + 100;
+                let duration = Math.random() * 20 + 10;
+                $container.append(`<div class="cloud-particle" style="top:${top}%; width:${size}px; height:${size/2}px; animation-duration:${duration}s"></div>`);
+            }
+        }
+        else if (weather.includes('clear')) {
+            // Güneşli
+            $container.append('<div class="sun-glow"></div>');
+        }
+        else if (weather.includes('snow')) {
+            // Karlı
+            for (let i = 0; i < 40; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 3 + 2;
+                $container.append(`<div class="snow-flake" style="left:${left}vw; animation-duration:${duration}s">❄</div>`);
+            }
+        }
+        else if (weather.includes('wind') || weather.includes('breeze')) {
+            // Rüzgarlı
+            for (let i = 0; i < 20; i++) {
+                let top = Math.random() * 100;
+                let duration = Math.random() * 0.5 + 0.5;
+                let delay = Math.random() * 2;
+                $container.append(`<div class="wind-line" style="top:${top}vh; animation-duration:${duration}s; animation-delay:${delay}s"></div>`);
+            }
+        } 
+        else if (weather.includes('hail')) {
+            // Dolu
+            for (let i = 0; i < 40; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 0.3 + 0.2; 
+                $container.append(`<div class="hail-stone" style="left:${left}vw; animation-duration:${duration}s"></div>`);
+            }
+        }
+        else if (weather.includes('mist') || weather.includes('fog')) {
+            // Sisli
+            $container.append('<div class="fog-layer"></div>');
+        }
+    }
+
 });
