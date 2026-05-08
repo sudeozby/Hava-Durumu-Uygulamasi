@@ -1,130 +1,144 @@
 $(document).ready(function() {
-    
-    // ==========================================
-    // SUDE'NİN GÖREVİ: Saate göre otomatik tema değişimi
-    // ==========================================
+    const apiKey = '5c03ce0373390aff630bcb6f7aac303b';
+    let favorites = JSON.parse(localStorage.getItem('favoriteCities')) || [];
+
+    // Başlangıç Ayarları
+    applyThemeByTime();
+    renderFavorites();
+
+    // 1. TEMA AYARI (Sude)
     function applyThemeByTime() {
         const hour = new Date().getHours();
         const $body = $('body');
-
-        // Sabah 06:00 ile Akşam 18:00 arası aydınlık mod
         if (hour >= 6 && hour < 18) {
             $body.removeClass('dark-theme').addClass('light-theme');
-            console.log("Sistem: Aydınlık Mod uygulandı.");
         } else {
             $body.removeClass('light-theme').addClass('dark-theme');
-            console.log("Sistem: Karanlık Mod uygulandı.");
         }
     }
 
-    applyThemeByTime();
-
-    // ==========================================
-    // ZEYNEP'İN GÖREVİ: API Veri Çekme ve Süzme Motoru
-    // ==========================================
-    const apiKey = '5c03ce0373390aff630bcb6f7aac303b'; 
-    const forecastApiUrlBase = 'https://api.openweathermap.org/data/2.5/forecast';
-    
-   function processForecastData(forecastList) {
-        const dailyData = {};
+    // 2. VERİ ÇEKME (Zeynep)
+    function getFiveDayForecast(city) {
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
         
-        forecastList.forEach(item => {
-            const date = item.dt_txt.split(' ')[0]; 
-            if (!dailyData[date]) {
-                // İkonları biriktirmek için 'icons: []' eklendi
-                dailyData[date] = { temps: [], weatherDescriptions: [], icons: [] };
-            }
-            dailyData[date].temps.push(item.main.temp); 
-            dailyData[date].weatherDescriptions.push(item.weather[0].description);
-            dailyData[date].icons.push(item.weather[0].icon); // İkonu torbaya at
-        });
-
-        const processedDailyArray = [];
-        
-        for (const date in dailyData) {
-            const day = dailyData[date];
-            const minTemp = Math.min(...day.temps); 
-            const maxTemp = Math.max(...day.temps); 
-            const description = day.weatherDescriptions[Math.floor(day.weatherDescriptions.length / 2)]; 
-            const icon = day.icons[Math.floor(day.icons.length / 2)]; // Günün ikonunu seç
-
-            processedDailyArray.push({
-                tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
-                enDusuk: Math.round(minTemp),
-                enYuksek: Math.round(maxTemp),
-                durum: description,
-                ikon: icon // Pakete ikonu da ekle
-            });
-        }
-        
-        return processedDailyArray.slice(0, 5);
-    }
-    // Temizlenen Veriyi HTML Kartlarına Çevirme
-    function displayForecastToHTML(dailyForecasts, cityName) {
-        const $container = $('#forecast-cards-container');
-        const $title = $('#forecast-city-name');
-        
-        $container.empty(); // Önceki şehirden kalan kartları temizle
-        $title.text(`${cityName} İçin 5 Günlük Hava Tahmini`).show(); // Başlığı göster
-
-        // 5 günlük veriyi dönüp kart oluşturuyoruz
-        dailyForecasts.forEach(day => {
-            const iconUrl = `https://openweathermap.org/img/w/${day.ikon}.png`; 
-            
-            const cardHTML = `
-                <div class="col">
-                    <div class="metric-card">
-                        <h5 class="card-title">${day.tarih}</h5>
-                        <img src="${iconUrl}" alt="${day.durum}" style="width: 80px; height: 80px;">
-                        <p class="metric-value mb-1">${day.enYuksek}° <span style="font-size:1rem; color:#888;">/ ${day.enDusuk}°</span></p>
-                        <p class="metric-label text-capitalize">${day.durum}</p>
-                    </div>
-                </div>
-            `;
-            $container.append(cardHTML);
-        });
-    }
-
-    function getFiveDayForecastForCity(city) {
-        console.log(`Motor Çalışıyor: ${city} için hava durumu aranıyor...`);
-        
-        const requestUrl = `${forecastApiUrlBase}?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+        // Yükleniyor ibaresi
+        $('#get-weather-btn').text('Aranıyor...').prop('disabled', true);
 
         $.ajax({
-            url: requestUrl,
+            url: url,
             method: 'GET',
-           success: function(data) {
-                const temizlenmisVeri = processForecastData(data.list);
+            success: function(data) {
+                const temizVeri = processForecastData(data.list);
+                displayForecastToHTML(temizVeri, data.city.name);
                 
-                // Konsola yazmayı bıraktık, artık HTML'e fırlatıyoruz!
-                displayForecastToHTML(temizlenmisVeri, data.city.name); 
-                
-                // Kübra'nın Efektlerini Tetikliyoruz
-                if (data.list && data.list[0]) {
-                    createWeatherEffects(data.list[0].weather[0].main);
-                }
+                createWeatherEffects(data.list[0].weather[0].main); // Kübra'nın efektleri çalışır
+                $('#add-to-fav-btn').fadeIn(); // Favori butonunu göster
             },
-            error: function(jqXHR) {
-                if (jqXHR.status === 404) {
-                    console.error("HATA: Şehir bulunamadı! Lütfen geçerli bir şehir yazın.");
-                } else {
-                    console.error("HATA: API bağlantı sorunu oluştu.");
-                }
+            error: function() { 
+                alert("Şehir bulunamadı! Lütfen geçerli bir şehir adı girin."); 
+            },
+            complete: function() {
+                $('#get-weather-btn').text('Getir').prop('disabled', false);
             }
         });
     }
 
-   // Arama Butonuna Tıklanınca Çalışacak Kodlar
-    $('#get-weather-btn').on('click', function() {
-        const city = $('#city-input').val().trim(); // Inputtaki yazıyı al
-        if (city !== "") {
-            getFiveDayForecastForCity(city);
-        } else {
-            alert("Lütfen bir şehir adı girin.");
+    function processForecastData(list) {
+        const daily = {};
+        list.forEach(item => {
+            const date = item.dt_txt.split(' ')[0];
+            if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [] };
+            daily[date].temps.push(item.main.temp);
+            daily[date].icons.push(item.weather[0].icon);
+            daily[date].desc.push(item.weather[0].description);
+        });
+        
+        return Object.keys(daily).slice(0, 5).map(date => ({
+            tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
+            enYuksek: Math.round(Math.max(...daily[date].temps)),
+            enDusuk: Math.round(Math.min(...daily[date].temps)),
+            durum: daily[date].desc[Math.floor(daily[date].desc.length / 2)], // Zeynep'in daha doğru olan ortalama bulma mantığı
+            ikon: daily[date].icons[Math.floor(daily[date].icons.length / 2)]
+        }));
+    }
+
+    function displayForecastToHTML(dailyForecasts, cityName) {
+        const $container = $('#forecast-cards-container');
+        $('#forecast-city-name').text(cityName + " İçin 5 Günlük Hava Tahmini").show();
+        $container.empty();
+        
+        dailyForecasts.forEach(day => {
+            $container.append(`
+                <div class="col">
+                    <div class="card weather-card text-center p-3 h-100 shadow-sm">
+                        <h5>${day.tarih}</h5>
+                        <img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" style="width:70px">
+                        <div class="temp-display" style="font-size: 1.5rem; font-weight:bold;">${day.enYuksek}° <span style="font-size:1rem; opacity:0.6">/ ${day.enDusuk}°</span></div>
+                        <p class="text-capitalize mb-0">${day.durum}</p>
+                    </div>
+                </div>
+            `);
+        });
+    }
+
+    // 3. FAVORİLER (Kübra & Beyza)
+    function renderFavorites() {
+        const $container = $('#favorite-cities-container');
+        $container.empty();
+        if (favorites.length === 0) {
+            $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
+            return;
+        }
+        favorites.forEach(city => {
+            $container.append(`
+                <div class="col">
+                    <div class="card p-3 d-flex flex-row justify-content-between align-items-center shadow-sm">
+                        <span class="fav-city" style="cursor:pointer; font-weight:bold; font-size:1.1rem; color:#0d6efd;">${city}</span>
+                        <button class="btn btn-danger btn-sm remove-fav" data-city="${city}">Sil</button>
+                    </div>
+                </div>
+            `);
+        });
+    }
+
+    // Favori Silme
+    $(document).on('click', '.remove-fav', function() {
+        const city = $(this).data('city');
+        favorites = favorites.filter(c => c !== city);
+        localStorage.setItem('favoriteCities', JSON.stringify(favorites));
+        renderFavorites();
+    });
+
+    // Favori Şehre Tıklayınca Hava Durumunu Getirme
+    $(document).on('click', '.fav-city', function() {
+        getFiveDayForecast($(this).text());
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Yukarı kaydır
+    });
+
+    // Favoriye Ekleme (LİMİT EKLENDİ)
+    $('#add-to-fav-btn').on('click', function() {
+        const city = $('#forecast-city-name').text().split(" İçin")[0];
+        
+        if (city && !favorites.includes(city)) {
+            if (favorites.length >= 6) {
+                alert("Maksimum 6 favori şehir ekleyebilirsiniz.");
+                return;
+            }
+            favorites.push(city);
+            localStorage.setItem('favoriteCities', JSON.stringify(favorites));
+            renderFavorites();
+            alert(`${city} favorilere eklendi!`);
+        } else if (favorites.includes(city)) {
+            alert(`${city} zaten favorilerinizde ekli.`);
         }
     });
 
-    // Arama kutusundayken Enter tuşuna basınca da çalışsın
+    // 4. BUTONLAR VE ARAMA
+    $('#get-weather-btn').on('click', function() {
+        const city = $('#city-input').val().trim();
+        if (city) getFiveDayForecast(city);
+    });
+
     $('#city-input').keypress(function(event) {
         if (event.which === 13) { 
             event.preventDefault(); 
@@ -133,21 +147,22 @@ $(document).ready(function() {
     });
 
     // ==========================================
-    // KÜBRA'NIN GÖREVİ: Dinamik Hava Durumu Efektleri
+    // KÜBRA'NIN EFEKTLERİ (GERİ GETİRİLDİ)
     // ==========================================
+    if($('#weather-effects-container').length === 0) {
+        $('body').prepend('<div id="weather-effects-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none;"></div>');
+    }
+
     function createWeatherEffects(condition) {
         const $container = $('#weather-effects-container');
-        $container.empty(); // Eski efektleri temizle
+        $container.empty(); 
         const weather = condition.toLowerCase();
         
-        // Gece mi gündüz mü kontrolü (Yıldızlar veya Güneş için)
         const hour = new Date().getHours();
         const isNight = (hour >= 18 || hour < 6);
 
         if (weather.includes('thunder') || weather.includes('storm')) {
-            // 1. ŞİMŞEK EFEKTİ (Gök Gürültülü Fırtına)
             $container.append('<div class="lightning-flash"></div>');
-            // Fırtınada aynı zamanda yağmur da yağsın
             for (let i = 0; i < 40; i++) {
                 let left = Math.random() * 100;
                 let duration = Math.random() * 0.8 + 0.2;
@@ -155,7 +170,6 @@ $(document).ready(function() {
             }
         }
         else if (weather.includes('rain')) {
-            // Yağmur
             for (let i = 0; i < 30; i++) {
                 let left = Math.random() * 100;
                 let duration = Math.random() * 1 + 0.5;
@@ -163,7 +177,6 @@ $(document).ready(function() {
             }
         } 
         else if (weather.includes('snow')) {
-            // Kar
             for (let i = 0; i < 40; i++) {
                 let left = Math.random() * 100;
                 let duration = Math.random() * 3 + 2;
@@ -171,7 +184,6 @@ $(document).ready(function() {
             }
         }
         else if (weather.includes('cloud')) {
-            // Bulutlu
             for (let i = 0; i < 5; i++) {
                 let top = Math.random() * 50;
                 let size = Math.random() * 200 + 100;
@@ -180,20 +192,16 @@ $(document).ready(function() {
             }
         }
         else if (weather.includes('clear')) {
-            // 2. YILDIZLI GECE VEYA GÜNEŞLİ GÜNDÜZ EFEKTİ
             if (isNight) {
-                // Geceyse 50 tane parlayan yıldız ekle
                 for (let i = 0; i < 50; i++) {
                     let left = Math.random() * 100;
-                    let top = Math.random() * 60; // Ekranın üst %60'lık kısmında çıksın
+                    let top = Math.random() * 60; 
                     let delay = Math.random() * 2;
                     $container.append(`<div class="night-star" style="left:${left}vw; top:${top}vh; animation-delay:${delay}s"></div>`);
                 }
             } else {
-                // Gündüzse güneş parlaması ekle
                 $container.append('<div class="sun-glow"></div>');
             }
         }
     }
-
-}); // <--- EN ÖNEMLİ KISIM BURASI: document.ready KAPANIŞI
+});
