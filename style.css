@@ -34,6 +34,7 @@ body {
     margin: 0;
 }
 
+<<<<<<< HEAD
 header {
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--card-border);
@@ -107,4 +108,114 @@ footer {
     text-align: center;
     border-top: 1px solid var(--card-border);
     margin-top: 50px;
+=======
+/* Diğer detaylı stilleri Beyza buraya ekleyecek */
+/* --- KÜBRA'NIN GÖREV ALANI: EFEKT ANİMASYONLARI --- */
+
+/* 1. Yağmur Efekti Animasyonu */
+@keyframes rain {
+    0% { transform: translateY(-10vh); }
+    100% { transform: translateY(100vh); }
+}
+
+.rain-drop {
+    position: fixed;
+    width: 2px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.6);
+    top: -20px;
+    z-index: -1; /* İçeriğin arkasında, arka planda kalsın */
+    animation: rain linear infinite;
+}
+
+/* 2. Bulut Efekti Animasyonu */
+@keyframes float {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100vw); }
+}
+
+.cloud-particle {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    filter: blur(20px); /* Bulutları bulanıklaştırarak gerçekçi yapar */
+    z-index: -1;
+    animation: float linear infinite;
+}
+
+/* 3. Güneş Efekti */
+.sun-glow {
+    position: fixed;
+    top: -10%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,235,59,0.3) 0%, rgba(255,235,59,0) 70%);
+    z-index: -1;
+}
+
+/* 4. Kar Efekti Animasyonu */
+@keyframes snow {
+    0% { transform: translateY(-10vh) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+.snow-flake {
+    position: fixed;
+    color: white;
+    font-size: 1.2rem;
+    top: -20px;
+    z-index: -1;
+    animation: snow linear infinite;
+    opacity: 0.8;
+}
+/* --- KÜBRA'NIN GÖREVİ: RÜZGAR VE DOLU ANİMASYONLARI --- */
+
+/* 1. Rüzgar Çizgileri Animasyonu */
+@keyframes wind-move {
+    0% { transform: translateX(-100vw); opacity: 0; }
+    50% { opacity: 0.7; }
+    100% { transform: translateX(100vw); opacity: 0; }
+}
+
+.wind-line {
+    position: fixed;
+    width: 100px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+    left: -100px;
+    z-index: -1;
+    animation: wind-move linear infinite;
+}
+
+/* 2. Dolu (Hail) Animasyonu */
+@keyframes hail-fall {
+    0% { transform: translateY(-10vh); }
+    100% { transform: translateY(100vh); }
+}
+
+.hail-stone {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 50%;
+    top: -10px;
+    box-shadow: 0 0 5px white;
+    z-index: -1;
+    animation: hail-fall linear infinite;
+}
+
+/* 3. Sis (Fog) Efekti */
+.fog-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    z-index: -1;
+    pointer-events: none;
+>>>>>>> 2055ac4c658db02fbcd809fc222ac8f9dcfe6068
 }
