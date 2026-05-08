@@ -1,13 +1,21 @@
 $(document).ready(function() {
-    const apiKey = '5c03ce0373390aff630bcb6f7aac303b';
-    let currentIcon = ''; // O anki ikon kodunu burada tutacağız
-    let favorites = JSON.parse(localStorage.getItem('favoriteCities')) || [];
+    // =================================================================
+    // GENEL DEĞİŞKENLER VE BAŞLANGIÇ AYARLARI
+    // =================================================================
+    const apiKey = '5c03ce0373390aff630bcb6f7aac303b'; // OpenWeatherMap API Anahtarı
+    let currentIcon = ''; // O anki ikon kodunu hafızada tutar
+    let favorites = JSON.parse(localStorage.getItem('favoriteCities')) || []; // Kayıtlı favorileri çeker
 
-    // BAŞLANGIÇ AYARLARI
+    // Sayfa yüklendiğinde temayı ayarla ve favori listesini ekrana bas
     applyThemeByTime();
     renderFavorites();
 
-    // 1. TEMA AYARI (Sude)
+
+    // =================================================================
+    // 1. TEMA YÖNETİMİ (Sude'nin Görevi)
+    // =================================================================
+    
+    // Saate veya kullanıcının tercihine göre temayı belirler
     function applyThemeByTime() {
         const hour = new Date().getHours();
         const savedTheme = localStorage.getItem('user-preference');
@@ -15,55 +23,75 @@ $(document).ready(function() {
         if (savedTheme) {
             $('body').addClass(savedTheme === 'dark' ? 'dark-theme' : 'light-theme');
         } else {
+            // Sabah 6 ile akşam 18 arası aydınlık, diğer saatler karanlık
             const theme = (hour >= 6 && hour < 18) ? 'light-theme' : 'dark-theme';
             $('body').addClass(theme);
         }
     }
 
+    // Tema değiştirme butonuna tıklandığında çalışır
     $('#theme-toggle-btn').on('click', function() {
         const $body = $('body');
         $body.toggleClass('light-theme dark-theme');
+        
+        // Yeni temayı hafızaya kaydet
         const currentTheme = $body.hasClass('dark-theme') ? 'dark' : 'light';
         localStorage.setItem('user-preference', currentTheme);
+        
+        // Butonun içindeki yazıyı ve ikonu değiştir
         $(this).html(currentTheme === 'dark' ? '<i class="bi bi-sun-fill text-warning"></i> Aydınlık' : '<i class="bi bi-moon-stars-fill"></i> Karanlık');
     });
 
-    // 2. VERİ ÇEKME VE İŞLEME (Zeynep)
+
+    // =================================================================
+    // 2. VERİ ÇEKME VE İŞLEME MOTORU (Zeynep'in Görevi)
+    // =================================================================
+    
+    // API'den 5 günlük hava durumu verisini çeken ana fonksiyon
     function getFiveDayForecast(city) {
         const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+        
+        // Veri gelirken butonu pasifleştir
         $('#get-weather-btn').text('Aranıyor...').prop('disabled', true);
 
         $.ajax({
             url: url,
             method: 'GET',
             success: function(data) {
+                // Veriyi temizle, HTML'e bas ve efektleri tetikle
                 const temizVeri = processForecastData(data.list);
                 displayForecastToHTML(temizVeri, data.city.name);
                 createWeatherEffects(data.list[0].weather[0].main); 
-                // İŞTE BURASI: O anki ikon kodunu hafızaya alıyoruz
-    currentIcon = temizVeri[0].ikon;
-                $('#add-to-fav-btn').fadeIn();
+                
+                currentIcon = temizVeri[0].ikon; // İkonu hafızaya al
+                $('#add-to-fav-btn').fadeIn(); // Favoriye ekle butonunu göster
             },
             error: function() { 
-                alert("Şehir bulunamadı!"); 
+                showNotification("Şehir bulunamadı! Geçerli bir şehir girin.", "info"); 
             },
             complete: function() {
+                // İşlem bitince butonu eski haline getir
                 $('#get-weather-btn').text('Göster').prop('disabled', false);
             }
         });
     }
 
+    // 40 adet 3 saatlik veriyi, 5 günlük net bir özete çevirir
     function processForecastData(list) {
         const daily = {};
+        
+        // Gelen verileri tarihlere göre torbalara ayırır
         list.forEach(item => {
             const date = item.dt_txt.split(' ')[0];
             if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [], mainCond: [] };
+            
             daily[date].temps.push(item.main.temp);
             daily[date].icons.push(item.weather[0].icon);
             daily[date].desc.push(item.weather[0].description);
             daily[date].mainCond.push(item.weather[0].main);
         });
         
+        // Her torbadaki en yüksek/düşük sıcaklıkları bularak son listeyi oluşturur
         return Object.keys(daily).slice(0, 5).map(date => ({
             tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
             enYuksek: Math.round(Math.max(...daily[date].temps)),
@@ -73,6 +101,7 @@ $(document).ready(function() {
         }));
     }
 
+    // Temizlenmiş 5 günlük listeyi arayüzdeki (HTML) kartlara dönüştürür
     function displayForecastToHTML(dailyForecasts, cityName) {
         const $container = $('#forecast-cards-container').empty();
         $('#forecast-city-name').text(cityName).show();
@@ -82,7 +111,7 @@ $(document).ready(function() {
                 <div class="col">
                     <div class="card weather-card text-center p-3 h-100 glass-card border-0" data-cond="${day.mainCond}">
                         <h6>${day.tarih}</h6>
-                        <img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" width="70">
+                        <img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" width="70" alt="${day.durum}">
                         <div class="fw-bold">${day.enYuksek}°</div>
                         <p class="small text-capitalize mb-0">${day.durum}</p>
                     </div>
@@ -91,12 +120,18 @@ $(document).ready(function() {
         });
     }
 
-    // 3. EFEKT MOTORU (Kübra)
+
+    // =================================================================
+    // 3. ANİMASYON VE EFEKT MOTORU (Kübra'nın Görevi)
+    // =================================================================
+    
+    // Gelen hava durumuna göre ekranda yağmur, kar veya yıldız oluşturur
     function createWeatherEffects(condition) {
         const $c = $('#weather-effects-container').empty();
         const w = condition.toLowerCase();
         const isNight = new Date().getHours() >= 18 || new Date().getHours() < 6;
 
+        // Eski arkaplanları temizle
         $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
 
         if (w.includes('rain')) {
@@ -116,118 +151,113 @@ $(document).ready(function() {
         }
     }
 
-   // ==========================================
-    // 4. FAVORİLER VE BUTONLAR (GÜNCEL)
-    // ==========================================
 
- // Favoriye Ekleme Butonu (GÜNCELLENDİ)
+    // =================================================================
+    // 4. FAVORİ ŞEHİRLER YÖNETİMİ (Beyza & Zeynep)
+    // =================================================================
+
+    // Hafızadaki favori şehirleri ekrana kart olarak çizer
+    function renderFavorites() {
+        const $container = $('#favorite-cities-container').empty();
+        
+        if (favorites.length === 0) {
+            $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
+            return;
+        }
+
+        favorites.forEach(fav => {
+            $container.append(`
+                <div class="col">
+                    <div class="card p-3 glass-card fav-card text-center" data-city="${fav.name}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold"><i class="bi bi-geo-alt-fill"></i> ${fav.name}</span>
+                            <button class="btn btn-link text-danger p-0 remove-fav" data-city="${fav.name}">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                        </div>
+                        <img src="https://openweathermap.org/img/wn/${fav.icon}@2x.png" class="fav-icon-img" alt="${fav.desc}" onerror="this.src='https://openweathermap.org/img/wn/01d@2x.png'">
+                        <div class="small mt-2">${fav.temp} - ${fav.desc}</div>
+                    </div>
+                </div>
+            `);
+        });
+    }
+
+    // Yıldızlı "Favorilere Ekle" butonuna tıklandığında çalışır
     $('#add-to-fav-btn').on('click', function() {
         const city = $('#forecast-city-name').text();
         
-        // İlk karttan verileri çekiyoruz
-        const $firstCard = $('#forecast-cards-container .card').first();
-        const temp = $firstCard.find('.fw-bold').text();
-        const desc = $firstCard.find('.small').text();
-        
-        // İkon kodunu çekme (Hata payını sıfıra indirdik)
-        const iconSrc = $firstCard.find('img').attr('src');
+        // Ekranda halihazırda görünen ilk günden verileri (derece, durum, ikon) çeker
+        const temp = $('#forecast-cards-container .fw-bold').first().text();
+        const desc = $('#forecast-cards-container .small').first().text();
+        const iconSrc = $('#forecast-cards-container img').first().attr('src');
         const iconCode = iconSrc ? iconSrc.split('/wn/')[1].split('@')[0] : '01d';
 
+        // 6 şehir limiti kontrolü
+        if (favorites.length >= 6 && !favorites.some(f => f.name === city)) {
+            showNotification("Maksimum 6 favori şehir ekleyebilirsiniz.", "info");
+            return;
+        }
+
+        // Şehir listede yoksa ekler
         if (city && !favorites.some(f => f.name === city)) {
-            // Paketi (Objeyi) oluştur ve listeye ekle
-            favorites.push({ 
-                name: city, 
-                temp: temp, 
-                desc: desc, 
-                icon: iconCode 
-            });
-            
+            favorites.push({ name: city, temp: temp, desc: desc, icon: iconCode });
             localStorage.setItem('favoriteCities', JSON.stringify(favorites));
-            renderFavorites(); // Listeyi anında tazele
             
+            renderFavorites(); // Arayüzü güncelle
             showNotification(`${city} favorilere eklendi!`, 'success');
         } else {
             showNotification("Zaten favorilerinizde!", "info");
         }
     });
-// B. renderFavorites() fonksiyonunu güncelle (İkonu HTML'e ekle):
-function renderFavorites() {
-    const $container = $('#favorite-cities-container').empty();
-    if (favorites.length === 0) {
-        $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
-        return;
-    }
-    favorites.forEach(fav => {
-        $container.append(`
-            <div class="col">
-                <div class="card p-3 glass-card fav-card text-center" data-city="${fav.name}">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-bold"><i class="bi bi-geo-alt-fill"></i> ${fav.name}</span>
-                        <button class="btn btn-link text-danger p-0 remove-fav" data-city="${fav.name}">
-                            <i class="bi bi-x-circle"></i>
-                        </button>
-                    </div>
-                    <img src="https://openweathermap.org/img/wn/${fav.icon}@2x.png" class="fav-icon-img" alt="${fav.desc}">
-                    <div class="small mt-2">${fav.temp} - ${fav.desc}</div>
-                </div>
-            </div>
-        `);
-    });
-}
-    // Favori kartına tıklayınca o şehri tekrar ara
+
+    // Favori kartının kendisine (div) tıklandığında o şehri aratır
     $(document).on('click', '.fav-card', function() {
         getFiveDayForecast($(this).data('city'));
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Sayfayı yukarı kaydır
     });
 
-    // Favoriden Silme (Mavi Etiket Çıkartır)
+    // Favori kartındaki "X" silme butonuna tıklandığında şehri siler
     $(document).on('click', '.remove-fav', function(e) {
-        e.stopPropagation();
+        e.stopPropagation(); // Karta tıklanmasını engelleyip sadece silmeyi tetikler
         const city = $(this).data('city');
+        
         favorites = favorites.filter(c => c.name !== city);
         localStorage.setItem('favoriteCities', JSON.stringify(favorites));
+        
         renderFavorites();
-        showNotification("Şehir listeden kaldırıldı.", "info"); // MAVİ ETİKET
+        showNotification("Şehir listeden kaldırıldı.", "info");
     });
 
-   // A. Favoriye Ekleme Butonu (add-to-fav-btn) kısmını güncelle:
-$('#add-to-fav-btn').on('click', function() {
-    const city = $('#forecast-city-name').text();
-    // Sıcaklık, açıklama VE İKON kodunu çekiyoruz
-    const temp = $('#forecast-cards-container .fw-bold').first().text();
-    const desc = $('#forecast-cards-container .small').first().text();
-    const iconCode = $('#forecast-cards-container img').first().attr('src').split('@')[0].split('/').pop(); // İkon kodunu ayıkla
 
-    if (city && !favorites.some(f => f.name === city)) {
-        // İkon kodunu da (icon) objeye ekle
-        favorites.push({ name: city, temp: temp, desc: desc, icon: iconCode });
-        localStorage.setItem('favoriteCities', JSON.stringify(favorites));
-        renderFavorites();
-        showNotification(`${city} favorilere eklendi!`, 'success');
-    } else {
-        showNotification("Zaten favorilerinizde!", "info");
-    }
-});
+    // =================================================================
+    // 5. ARAMA İŞLEMLERİ VE BİLDİRİMLER
+    // =================================================================
 
+    // "Göster" butonuna tıklandığında aramayı başlatır
     $('#get-weather-btn').on('click', function() {
         const city = $('#city-input').val().trim();
         if (city) getFiveDayForecast(city);
     });
-function showNotification(message, type = 'success') {
-    const $toast = $('#notification-toast');
-    
-    // Mesajı ve rengi ayarla
-    $toast.text(message)
-          .removeClass('success info')
-          .addClass(type)
-          .addClass('show');
 
-    // 3 saniye sonra gizle
-    setTimeout(() => {
-        $toast.removeClass('show');
-    }, 3000);
-}
+    // Arama kutusundayken "Enter" tuşuna basıldığında aramayı başlatır
+    $('#city-input').keypress(function(event) {
+        if (event.which === 13) { 
+            event.preventDefault(); 
+            $('#get-weather-btn').click(); 
+        }
+    });
+
+    // Sağ üstte çıkan renkli bildirim baloncuklarını (Toast) yönetir
+    function showNotification(message, type = 'success') {
+        const $toast = $('#notification-toast');
+        
+        // İçeriği ve rengi ayarla, ekranda göster
+        $toast.text(message).removeClass('success info').addClass(type).addClass('show');
+
+        // 3 saniye sonra otomatik gizle
+        setTimeout(() => {
+            $toast.removeClass('show');
+        }, 3000);
+    }
 });
-// Favori butonuna tıklandığında kullanımı:
-// showNotification("Şehir favorilere eklendi!", "success"); // Yeşil çıkar
-// showNotification("Zaten favorilerde!", "info");          // Mavi çıkar
