@@ -13,7 +13,7 @@ body { background-color: var(--bg-color); color: var(--text-color); font-family:
 }
 .toast-message.show { transform: translateX(0); }
 
-/* Cam Efekti Kartlar */
+/* Cam Efekti Kartları */
 .glass-card { background: var(--card-bg) !important; backdrop-filter: blur(10px); border-radius: 20px; }
 
 /* Tıklanan Kart */

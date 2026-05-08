@@ -108,7 +108,7 @@ $(document).ready(function() {
 
     // ... (Zeynep'in processForecastData ve renderFavorites fonksiyonlarını buraya ekle)
 
-    // KÜBRA'NIN EFEKTLERİ
+    // KÜBRA NIN EFEKTLERİ
     function createWeatherEffects(condition) {
         const $c = $('#weather-effects-container').empty();
         const w = condition.toLowerCase();
