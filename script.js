@@ -109,16 +109,43 @@ $(document).ready(function() {
     // ... (Zeynep'in processForecastData ve renderFavorites fonksiyonlarını buraya ekle)
 
     // KÜBRA'NIN EFEKTLERİ
+  // KÜBRA'NIN YENİ EFEKT MOTORU (Bunu Eskisiyle Değiştir)
     function createWeatherEffects(condition) {
         const $c = $('#weather-effects-container').empty();
         const w = condition.toLowerCase();
+        
+        // Önce eski arka plan sınıflarını temizle
+        $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
+
         if (w.includes('rain')) {
-            for(let i=0; i<30; i++) $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw"></div>`);
+            $('body').addClass('rainy-bg'); // Arka planı yağmurlu yap
+            for(let i=0; i<50; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 1 + 0.5;
+                $c.append(`<div class="rain-drop" style="left:${left}vw; animation-duration:${duration}s"></div>`);
+            }
         } else if (w.includes('clear')) {
+            $('body').addClass('sunny-bg'); // Arka planı güneşli yap
             $c.append('<div class="sun-glow"></div>');
         } else if (w.includes('thunder') || w.includes('storm')) {
             $c.append('<div class="lightning-flash"></div>');
         }
+    }
+
+    // ZEYNEP'İN VERİ İŞLEME MOTORU (Buna Dokunma, Olduğu Gibi Kalsın)
+    function processForecastData(list) {
+        const daily = {};
+        list.forEach(i => {
+            const date = i.dt_txt.split(' ')[0];
+            if (!daily[date]) daily[date] = i;
+        });
+        return Object.values(daily).slice(0, 5).map(i => ({
+            tarih: new Date(i.dt * 1000).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
+            enYuksek: Math.round(i.main.temp),
+            durum: i.weather[0].description,
+            icon: i.weather[0].icon,
+            mainCond: i.weather[0].main
+        }));
     }
 
     function processForecastData(list) {
@@ -136,12 +163,32 @@ $(document).ready(function() {
         }));
     }
 
+// ... diğer kodların bittiği yer ...
+
+    // YENİ KODLAR BURAYA:
     function renderFavorites() {
         const container = $('#favorite-cities-container').empty();
+        if (favorites.length === 0) {
+            container.append('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
+            return;
+        }
+        
         favorites.forEach(city => {
-            container.append(`<div class="col"><div class="card p-3 glass-card fav-card" onclick="getForecast('${city}')">${city}</div></div>`);
+            container.append(`
+                <div class="col">
+                    <div class="card p-3 glass-card fav-card text-center" data-city="${city}">
+                        <i class="bi bi-geo-alt-fill me-2"></i>${city}
+                    </div>
+                </div>
+            `);
         });
     }
 
-    window.getForecast = getFiveDayForecast; // Favori tıklaması için
-});
+    $(document).on('click', '.fav-card', function() {
+        const cityName = $(this).data('city');
+        $('#city-input').val(cityName);
+        getFiveDayForecast(cityName);
+        notify(`${cityName} yükleniyor...`);
+    });
+
+}); // DOSYANIN EN SONUNDAKİ BU PARANTEZ HER ZAMAN EN ALTTA KALMALI
