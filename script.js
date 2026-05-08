@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    localStorage.clear(); // Tüm eski bozuk verileri siler
     // =================================================================
     // GENEL DEĞİŞKENLER VE BAŞLANGIÇ AYARLARI
     // =================================================================
