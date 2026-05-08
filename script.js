@@ -1,5 +1,6 @@
 $(document).ready(function() {
     const apiKey = '5c03ce0373390aff630bcb6f7aac303b';
+    let currentIcon = ''; // O anki ikon kodunu burada tutacağız
     let favorites = JSON.parse(localStorage.getItem('favoriteCities')) || [];
 
     // BAŞLANGIÇ AYARLARI
@@ -39,6 +40,8 @@ $(document).ready(function() {
                 const temizVeri = processForecastData(data.list);
                 displayForecastToHTML(temizVeri, data.city.name);
                 createWeatherEffects(data.list[0].weather[0].main); 
+                // İŞTE BURASI: O anki ikon kodunu hafızaya alıyoruz
+    currentIcon = temizVeri[0].ikon;
                 $('#add-to-fav-btn').fadeIn();
             },
             error: function() { 
@@ -117,25 +120,36 @@ $(document).ready(function() {
     // 4. FAVORİLER VE BUTONLAR (GÜNCEL)
     // ==========================================
 
-  // A. Favoriye Ekleme Butonu (add-to-fav-btn) kısmını güncelle:
-$('#add-to-fav-btn').on('click', function() {
-    const city = $('#forecast-city-name').text();
-    // Sıcaklık, açıklama VE İKON kodunu çekiyoruz
-    const temp = $('#forecast-cards-container .fw-bold').first().text();
-    const desc = $('#forecast-cards-container .small').first().text();
-    const iconCode = $('#forecast-cards-container img').first().attr('src').split('@')[0].split('/').pop(); // İkon kodunu ayıkla
+ // Favoriye Ekleme Butonu (GÜNCELLENDİ)
+    $('#add-to-fav-btn').on('click', function() {
+        const city = $('#forecast-city-name').text();
+        
+        // İlk karttan verileri çekiyoruz
+        const $firstCard = $('#forecast-cards-container .card').first();
+        const temp = $firstCard.find('.fw-bold').text();
+        const desc = $firstCard.find('.small').text();
+        
+        // İkon kodunu çekme (Hata payını sıfıra indirdik)
+        const iconSrc = $firstCard.find('img').attr('src');
+        const iconCode = iconSrc ? iconSrc.split('/wn/')[1].split('@')[0] : '01d';
 
-    if (city && !favorites.some(f => f.name === city)) {
-        // İkon kodunu da (icon) objeye ekle
-        favorites.push({ name: city, temp: temp, desc: desc, icon: iconCode });
-        localStorage.setItem('favoriteCities', JSON.stringify(favorites));
-        renderFavorites();
-        showNotification(`${city} favorilere eklendi!`, 'success');
-    } else {
-        showNotification("Zaten favorilerinizde!", "info");
-    }
-});
-
+        if (city && !favorites.some(f => f.name === city)) {
+            // Paketi (Objeyi) oluştur ve listeye ekle
+            favorites.push({ 
+                name: city, 
+                temp: temp, 
+                desc: desc, 
+                icon: iconCode 
+            });
+            
+            localStorage.setItem('favoriteCities', JSON.stringify(favorites));
+            renderFavorites(); // Listeyi anında tazele
+            
+            showNotification(`${city} favorilere eklendi!`, 'success');
+        } else {
+            showNotification("Zaten favorilerinizde!", "info");
+        }
+    });
 // B. renderFavorites() fonksiyonunu güncelle (İkonu HTML'e ekle):
 function renderFavorites() {
     const $container = $('#favorite-cities-container').empty();
@@ -147,14 +161,14 @@ function renderFavorites() {
         $container.append(`
             <div class="col">
                 <div class="card p-3 glass-card fav-card text-center" data-city="${fav.name}">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-bold fav-city-title"><i class="bi bi-geo-alt-fill me-1"></i>${fav.name}</span>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold"><i class="bi bi-geo-alt-fill"></i> ${fav.name}</span>
                         <button class="btn btn-link text-danger p-0 remove-fav" data-city="${fav.name}">
                             <i class="bi bi-x-circle"></i>
                         </button>
                     </div>
-                    <img src="https://openweathermap.org/img/wn/${fav.icon}@2x.png" width="50" class="mx-auto" alt="${fav.desc}">
-                    <div class="small fav-weather-desc">${fav.temp} - ${fav.desc}</div>
+                    <img src="https://openweathermap.org/img/wn/${fav.icon}@2x.png" class="fav-icon-img" alt="${fav.desc}">
+                    <div class="small mt-2">${fav.temp} - ${fav.desc}</div>
                 </div>
             </div>
         `);
