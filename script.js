@@ -57,7 +57,7 @@ $(document).ready(function() {
             tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
             enYuksek: Math.round(Math.max(...daily[date].temps)),
             enDusuk: Math.round(Math.min(...daily[date].temps)),
-            durum: daily[date].desc[Math.floor(daily[date].desc.length / 2)], // Zeynep'in daha doğru olan ortalama bulma mantığı
+            durum: daily[date].desc[Math.floor(daily[date].desc.length / 2)], 
             ikon: daily[date].icons[Math.floor(daily[date].icons.length / 2)]
         }));
     }
@@ -91,7 +91,6 @@ $(document).ready(function() {
         }
 
         favorites.forEach(city => {
-            // Her kart için benzersiz bir ID oluşturuyoruz (İçine dereceyi basabilmek için)
             const cardId = `fav-card-${city.replace(/\s+/g, '-')}`;
 
             $container.append(`
@@ -108,14 +107,11 @@ $(document).ready(function() {
                 </div>
             `);
 
-            // Kuryeyi bu şehir için anlık veriyi getirmesi adına gönderiyoruz
             getCurrentWeatherForFavorite(city, `#${cardId}`);
         });
     }
 
-    // YENİ: Sadece favori kartlarına anlık sıcaklık ve ikon çeken motor
     function getCurrentWeatherForFavorite(city, targetElementId) {
-        // API'den "weather" (anlık) verisi istiyoruz
         const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
 
         $.ajax({
@@ -126,7 +122,6 @@ $(document).ready(function() {
                 const desc = data.weather[0].description;
                 const icon = data.weather[0].icon;
                 
-                // Veri gelince dönen animasyonu silip yerine dereceyi ve ikonu basıyoruz
                 $(targetElementId).html(`
                     <div class="d-flex align-items-center mt-1">
                         <img src="https://openweathermap.org/img/wn/${icon}.png" style="width:50px; margin-left:-10px;">
@@ -143,23 +138,20 @@ $(document).ready(function() {
         });
     }
 
-  // Favori Silme
     $(document).on('click', '.remove-fav', function(e) {
-        e.stopPropagation(); // ARAMAYI DURDURUR! Sadece silme işlemini yapar.
+        e.stopPropagation(); 
         const city = $(this).data('city');
         favorites = favorites.filter(c => c !== city);
         localStorage.setItem('favoriteCities', JSON.stringify(favorites));
         renderFavorites();
     });
 
-    // Favori Şehre (Karta) Tıklayınca Hava Durumunu Getirme
     $(document).on('click', '.fav-card', function() {
-        const city = $(this).data('city'); // Tıklanan kartın içindeki şehri al
-        getFiveDayForecast(city);          // O şehri motora gönder
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // Sayfayı yukarı kaydır
+        const city = $(this).data('city'); 
+        getFiveDayForecast(city);          
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
     });
 
-    // Favoriye Ekleme (LİMİT EKLENDİ)
     $('#add-to-fav-btn').on('click', function() {
         const city = $('#forecast-city-name').text().split(" İçin")[0];
         
@@ -191,14 +183,12 @@ $(document).ready(function() {
     });
 
     // ==========================================
-    // KÜBRA'NIN EFEKTLERİ (GERİ GETİRİLDİ)
+    // KÜBRA'NIN EFEKTLERİ
     // ==========================================
     if($('#weather-effects-container').length === 0) {
         $('body').prepend('<div id="weather-effects-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none;"></div>');
     }
 
-<HEAD
-    // KÜBRA NIN EFEKTLERİ> 8d3e9b2384439a2ff54d9389ccf0087b43f56a64
     function createWeatherEffects(condition) {
         const $container = $('#weather-effects-container');
         $container.empty(); 
