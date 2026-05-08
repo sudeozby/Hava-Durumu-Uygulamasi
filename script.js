@@ -113,47 +113,63 @@ $(document).ready(function() {
         }
     }
 
-    // 4. FAVORİLER VE BUTONLAR
+   // ==========================================
+    // 4. FAVORİLER VE BUTONLAR (GÜNCEL)
+    // ==========================================
+
     function renderFavorites() {
         const $container = $('#favorite-cities-container').empty();
         if (favorites.length === 0) {
             $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
             return;
         }
-        favorites.forEach(city => {
+        favorites.forEach(fav => {
+            // Sude, burada artık sadece isim değil, temp ve desc (hava durumu) da basıyoruz
             $container.append(`
                 <div class="col">
-                    <div class="card p-3 glass-card fav-card text-center" data-city="${city}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-geo-alt-fill me-2"></i>${city}</span>
-                            <button class="btn btn-link text-danger p-0 remove-fav" data-city="${city}"><i class="bi bi-x-circle"></i></button>
+                    <div class="card p-3 glass-card fav-card text-center" data-city="${fav.name}">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold"><i class="bi bi-geo-alt-fill me-1"></i>${fav.name}</span>
+                            <button class="btn btn-link text-danger p-0 remove-fav" data-city="${fav.name}">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
                         </div>
+                        <div class="small text-muted">${fav.temp} - ${fav.desc}</div>
                     </div>
                 </div>
             `);
         });
     }
 
+    // Favori kartına tıklayınca o şehri tekrar ara
     $(document).on('click', '.fav-card', function() {
         getFiveDayForecast($(this).data('city'));
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
+    // Favoriden Silme (Mavi Etiket Çıkartır)
     $(document).on('click', '.remove-fav', function(e) {
         e.stopPropagation();
         const city = $(this).data('city');
-        favorites = favorites.filter(c => c !== city);
+        favorites = favorites.filter(c => c.name !== city);
         localStorage.setItem('favoriteCities', JSON.stringify(favorites));
         renderFavorites();
+        showNotification("Şehir listeden kaldırıldı.", "info"); // MAVİ ETİKET
     });
 
+    // Favoriye Ekleme (Yeşil Etiket Çıkartır)
     $('#add-to-fav-btn').on('click', function() {
         const city = $('#forecast-city-name').text();
-        if (city && !favorites.includes(city)) {
-            favorites.push(city);
+        const temp = $('#forecast-cards-container .fw-bold').first().text();
+        const desc = $('#forecast-cards-container .small').first().text();
+
+        if (city && !favorites.some(f => f.name === city)) {
+            favorites.push({ name: city, temp: temp, desc: desc });
             localStorage.setItem('favoriteCities', JSON.stringify(favorites));
             renderFavorites();
-            alert("Favorilere eklendi!");
+            showNotification(`${city} favorilere eklendi!`, 'success'); // YEŞİL ETİKET
+        } else {
+            showNotification("Zaten favorilerinizde!", "info"); // MAVİ ETİKET
         }
     });
 
@@ -161,4 +177,21 @@ $(document).ready(function() {
         const city = $('#city-input').val().trim();
         if (city) getFiveDayForecast(city);
     });
+function showNotification(message, type = 'success') {
+    const $toast = $('#notification-toast');
+    
+    // Mesajı ve rengi ayarla
+    $toast.text(message)
+          .removeClass('success info')
+          .addClass(type)
+          .addClass('show');
+
+    // 3 saniye sonra gizle
+    setTimeout(() => {
+        $toast.removeClass('show');
+    }, 3000);
+}
 });
+// Favori butonuna tıklandığında kullanımı:
+// showNotification("Şehir favorilere eklendi!", "success"); // Yeşil çıkar
+// showNotification("Zaten favorilerde!", "info");          // Mavi çıkar

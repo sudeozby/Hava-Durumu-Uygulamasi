@@ -1,16 +1,42 @@
 /* TEMA DEĞİŞKENLERİ */
-.light-theme { --bg-color: #f8f9fa; --text-color: #212529; --card-bg: rgba(255,255,255,0.8); }
-.dark-theme { --bg-color: #0f172a; --text-color: #f8fafc; --card-bg: rgba(30, 41, 59, 0.9); }
-
-body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Roboto', sans-serif; transition: 0.4s; min-height: 100vh; }
-
-/* Bildirim (Toast) Stili */
-.toast-message {
-    position: fixed; top: 80px; right: 20px; padding: 15px 25px;
-    background: #2ecc71; color: white; border-radius: 12px;
-    transform: translateX(200%); transition: 0.5s ease; z-index: 9999;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1); font-weight: bold;
+.light-theme { 
+    --bg-color: #f8f9fa; 
+    --text-color: #212529; 
+    --card-bg: rgba(255,255,255,0.8); 
 }
+.dark-theme { 
+    --bg-color: #0f172a; 
+    --text-color: #f8fafc; 
+    --card-bg: rgba(30, 41, 59, 0.9); 
+}
+
+body { 
+    background-color: var(--bg-color); 
+    color: var(--text-color); 
+    font-family: 'Roboto', sans-serif; 
+    transition: background 0.5s ease, color 0.5s ease; /* Yumuşak geçiş için */
+    min-height: 100vh; 
+}
+/* Bildirim Etiketi Genel Yapısı */
+.toast-message {
+    position: fixed; 
+    top: 20px; 
+    right: 20px; 
+    padding: 15px 25px;
+    color: white; 
+    border-radius: 12px;
+    transform: translateX(200%); /* Başlangıçta ekranın dışında */
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+    z-index: 10000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+    font-weight: 500;
+}
+
+/* Durumlara göre renkler */
+.toast-message.success { background: #2ecc71; } /* Yeşil */
+.toast-message.info { background: #3498db; }    /* Mavi */
+
+/* Görünür hale getiren sınıf */
 .toast-message.show { transform: translateX(0); }
 
 /* Cam Efekti Kartları */
@@ -52,8 +78,51 @@ body { background-color: var(--bg-color); color: var(--text-color); font-family:
     color: var(--bg-color) !important;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
-/* Hava durumuna göre arka plan renk geçişleri */
-/* style.css en sonuna ekle */
-body.rainy-bg { background: linear-gradient(to bottom, #2c3e50, #bdc3c7) !important; }
-body.sunny-bg { background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%) !important; }
-body.cloudy-bg { background: linear-gradient(to bottom, #757f9a, #d7dde8) !important; }
+
+
+/* 1. KARANLIK MOD YAZI DÜZELTMESİ */
+.dark-theme, .dark-theme main, .dark-theme .card, .dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h5, .dark-theme p, .dark-theme span {
+    color: #f8fafc !important; /* Yazıları beyaz yapar */
+}
+
+.dark-theme .form-control {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark-theme .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 2. HAVA DURUMU ARKA PLAN EFEKTLERİ */
+/* Sadece damlalar değil, tüm ekranın rengi değişsin diye: */
+/* HAVA DURUMUNA GÖRE ARKA PLANLAR (TEMA UYUMLU) */
+
+/* GÜNEŞLİ */
+.light-theme.sunny-bg { background: linear-gradient(135deg, #fffde7 0%, #ffffff 100%) !important; }
+.dark-theme.sunny-bg { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important; }
+
+/* YAĞMURLU */
+.light-theme.rainy-bg { background: linear-gradient(to bottom, #cfd8dc, #eceff1) !important; }
+.dark-theme.rainy-bg { background: linear-gradient(to bottom, #1e293b, #020617) !important; }
+
+/* BULUTLU */
+.light-theme.cloudy-bg { background: linear-gradient(to bottom, #eeeeee, #ffffff) !important; }
+.dark-theme.cloudy-bg { background: linear-gradient(to bottom, #334155, #0f172a) !important; }
+/* 3. YAĞMUR DAMLASI GÖRÜNÜRLÜĞÜ */
+.rain-drop {
+    position: fixed;
+    width: 2px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.6);
+    top: -10px;
+    z-index: 1000;
+    pointer-events: none;
+    animation: rain linear infinite;
+}
+
+@keyframes rain {
+    0% { transform: translateY(0vh); }
+    100% { transform: translateY(100vh); }
+}
