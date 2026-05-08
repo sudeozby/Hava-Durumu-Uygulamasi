@@ -239,5 +239,28 @@ $(document).ready(function() {
                 $container.append('<div class="sun-glow"></div>');
             }
         }
+    }// TEMA DEĞİŞTİRME BUTONU (Sude - Manuel Kontrol)
+    $('#theme-toggle-btn, #manual-theme-btn').on('click', function() {
+        const $body = $('body');
+        
+        if ($body.hasClass('light-theme')) {
+            $body.removeClass('light-theme').addClass('dark-theme');
+            $(this).html('<i class="bi bi-sun-fill text-warning"></i> Aydınlık');
+        } else {
+            $body.removeClass('dark-theme').addClass('light-theme');
+            $(this).html('<i class="bi bi-moon-stars-fill"></i> Karanlık');
+        }
+        
+        // Kullanıcının seçimini hafızaya atalım (Sayfa yenilenince bozulmasın)
+        const currentTheme = $body.hasClass('dark-theme') ? 'dark' : 'light';
+        localStorage.setItem('user-preference', currentTheme);
+    });
+
+    // Sayfa açıldığında hafızadaki temayı kontrol et
+    const savedTheme = localStorage.getItem('user-preference');
+    if (savedTheme === 'dark') {
+        $('body').addClass('dark-theme').removeClass('light-theme');
+    } else if (savedTheme === 'light') {
+        $('body').addClass('light-theme').removeClass('dark-theme');
     }
 });
