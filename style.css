@@ -1,4 +1,6 @@
-/* 1. TEMA ALTYAPISI (Sude & Beyza Ortak) */
+/* ==========================================
+   1. TEMA ALTYAPISI (Sude & Beyza Ortak)
+   ========================================== */
 :root {
     --bg-color: #ffffff;
     --text-color: #212529;
@@ -21,7 +23,9 @@
     --shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
-/* 2. GENEL AYARLAR */
+/* ==========================================
+   2. GENEL AYARLAR
+   ========================================== */
 * {
     transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
@@ -34,189 +38,182 @@ body {
     margin: 0;
 }
 
-
-header {
-    background-color: var(--card-bg);
-    border-bottom: 1px solid var(--card-border);
-    margin-bottom: 2rem;
+/* Arka plana hafif pastel geçiş (Görseldeki gibi) */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 30vh;
+    background: linear-gradient(180deg, rgba(251, 230, 255, 0.5) 0%, transparent 100%);
+    z-index: -2;
+}
+.dark-theme::before {
+    background: linear-gradient(180deg, rgba(43, 16, 85, 0.5) 0%, transparent 100%);
 }
 
-/* 3. KART TASARIMI (BEYZA) */
-.card {
-    background-color: var(--card-bg) !important; /* Bootstrap'i ezmek için */
+/* ==========================================
+   3. BEYZA'NIN GÖREVİ: KART VE DETAY TASARIMLARI
+   ========================================== */
+
+/* 81 İl Ana Ekran Kartları */
+.city-card {
+    background-color: var(--card-bg);
     color: var(--text-color);
     border: 1px solid var(--card-border);
     border-radius: 20px;
+    padding: 30px;
+    text-align: center;
     box-shadow: var(--shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    padding: 20px;
+    cursor: pointer;
 }
 
-.card:hover {
+.city-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
 }
 
-/* 4. ARAMA BÖLÜMÜ */
-.form-control {
-    border-radius: 12px 0 0 12px !important;
-    border: 2px solid var(--card-border);
-    background-color: var(--card-bg) !important;
-    color: var(--text-color) !important;
-    padding: 12px;
-}
+.city-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 15px; }
+.city-temp { font-size: 2.5rem; font-weight: 800; color: #6c5ce7; }
+.dark-theme .city-temp { color: #a29bfe; }
+.btn-detail { background: #6c5ce7; color: white; border-radius: 12px; padding: 8px 20px; margin-top: 15px; border: none; width: 100%; }
 
-#get-weather-btn {
-    border-radius: 0 12px 12px 0 !important;
-    font-weight: bold;
-    padding: 0 25px;
-}
-
-/* 5. HAVA DURUMUNA ÖZEL RENKLER */
-.weather-card.sunny {
-    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%) !important;
-    color: #fff !important;
-    border: none;
-}
-
-.weather-card.rainy {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
-    color: #fff !important;
-    border: none;
-}
-
-.weather-card.cloudy {
-    background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%) !important;
-    color: #fff !important;
-    border: none;
-}
-
-/* 6. TAHMİN KARTLARI DETAYI */
-#forecast-cards-container .card {
+/* Detay Sayfası: 6'lı Metrik Kartları */
+.metric-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 15px;
+    padding: 20px 10px;
     text-align: center;
-    padding: 15px;
+    box-shadow: var(--shadow);
+    height: 100%;
+    transition: transform 0.2s;
 }
+.metric-card:hover { transform: translateY(-5px); }
+.metric-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.metric-value { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; }
+.metric-label { font-size: 0.75rem; color: #888; font-weight: 600; letter-spacing: 1px; }
 
-.temp-display {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 10px 0;
+/* 24 Saatlik Tahmin Bölümü */
+.hourly-forecast-section, .weekly-forecast-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+    overflow: hidden;
 }
+.hourly-header { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); padding: 20px; }
+.dark-theme .hourly-header { background: linear-gradient(135deg, #4b134f 0%, #c94b4b 100%); }
+.hourly-body { padding: 20px; }
+.hour-card { min-width: 90px; border: 1px solid var(--card-border); border-radius: 15px; padding: 15px 10px; text-align: center; }
 
-footer {
-    padding: 20px;
-    text-align: center;
-    border-top: 1px solid var(--card-border);
-    margin-top: 50px;
-}
+/* ==========================================
+   4. KÜBRA'NIN GÖREV ALANI: EFEKT ANİMASYONLARI
+   ========================================== */
 
-/* Diğer detaylı stilleri Beyza buraya ekleyecek */
-/* --- KÜBRA'NIN GÖREV ALANI: EFEKT ANİMASYONLARI --- */
-
-/* 1. Yağmur Efekti Animasyonu */
+/* Yağmur Efekti */
 @keyframes rain {
     0% { transform: translateY(-10vh); }
     100% { transform: translateY(100vh); }
 }
-
 .rain-drop {
-    position: fixed;
-    width: 2px;
-    height: 15px;
-    background: rgba(255, 255, 255, 0.6);
-    top: -20px;
-    z-index: -1; /* İçeriğin arkasında, arka planda kalsın */
-    animation: rain linear infinite;
+    position: fixed; width: 2px; height: 15px; background: rgba(255, 255, 255, 0.6);
+    top: -20px; z-index: -1; animation: rain linear infinite;
 }
 
-/* 2. Bulut Efekti Animasyonu */
+/* Bulut Efekti */
 @keyframes float {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100vw); }
-}g
-
+}
 .cloud-particle {
-    position: fixed;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    filter: blur(20px); /* Bulutları bulanıklaştırarak gerçekçi yapar */
-    z-index: -1;
-    animation: float linear infinite;
+    position: fixed; background: rgba(255, 255, 255, 0.3); border-radius: 50%;
+    filter: blur(20px); z-index: -1; animation: float linear infinite;
 }
 
-/* 3. Güneş Efekti */
+/* Güneş Efekti */
 .sun-glow {
-    position: fixed;
-    top: -10%;
-    right: -10%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255,235,59,0.3) 0%, rgba(255,235,59,0) 70%);
-    z-index: -1;
+    position: fixed; top: -10%; right: -10%; width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,235,59,0.3) 0%, rgba(255,235,59,0) 70%); z-index: -1;
 }
 
-/* 4. Kar Efekti Animasyonu */
+/* Kar Efekti */
 @keyframes snow {
     0% { transform: translateY(-10vh) rotate(0deg); }
     100% { transform: translateY(100vh) rotate(360deg); }
-}aa
-
-.snow-flake {
-    position: fixed;
-    color: white;
-    font-size: 1.2rem;
-    top: -20px;
-    z-index: -1;
-    animation: snow linear infinite;
-    opacity: 0.8;
 }
-/* --- KÜBRA'NIN GÖREVİ: RÜZGAR VE DOLU ANİMASYONLARI --- */
+.snow-flake {
+    position: fixed; color: white; font-size: 1.2rem; top: -20px;
+    z-index: -1; animation: snow linear infinite; opacity: 0.8;
+}
 
-/* 1. Rüzgar Çizgileri Animasyonu */
+/* Rüzgar Çizgileri */
 @keyframes wind-move {
     0% { transform: translateX(-100vw); opacity: 0; }
     50% { opacity: 0.7; }
     100% { transform: translateX(100vw); opacity: 0; }
 }
-
 .wind-line {
-    position: fixed;
-    width: 100px;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.3);
-    left: -100px;
-    z-index: -1;
-    animation: wind-move linear infinite;
+    position: fixed; width: 100px; height: 1px; background: rgba(255, 255, 255, 0.3);
+    left: -100px; z-index: -1; animation: wind-move linear infinite;
 }
 
-/* 2. Dolu (Hail) Animasyonu */
+/* Dolu (Hail) */
 @keyframes hail-fall {
     0% { transform: translateY(-10vh); }
     100% { transform: translateY(100vh); }
 }
-
 .hail-stone {
-    position: fixed;
-    width: 4px;
-    height: 4px;
-    background: #ffffff;
-    border-radius: 50%;
-    top: -10px;
-    box-shadow: 0 0 5px white;
-    z-index: -1;
-    animation: hail-fall linear infinite;
+    position: fixed; width: 4px; height: 4px; background: #ffffff; border-radius: 50%;
+    top: -10px; box-shadow: 0 0 5px white; z-index: -1; animation: hail-fall linear infinite;
 }
 
-/* 3. Sis (Fog) Efekti */
+/* Sis (Fog) */
 .fog-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(5px);
-    z-index: -1;
-    pointer-events: none;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px);
+    z-index: -1; pointer-events: none;
+}
 
+/* Şimşek Parlaması */
+@keyframes lightning {
+    0% { opacity: 0; }
+    2% { opacity: 0.8; } 
+    4% { opacity: 0; }
+    6% { opacity: 0.9; } 
+    8% { opacity: 0; }
+    100% { opacity: 0; } 
+}
+.lightning-flash {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(255, 255, 255, 0.4); z-index: 999; 
+    pointer-events: none; animation: lightning 7s infinite; 
+}
+
+/* Yıldızlı Gece (Twinkle) */
+@keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px white; }
+}
+.night-star {
+    position: fixed; width: 3px; height: 3px; background: white; border-radius: 50%;
+    z-index: -1; animation: twinkle 3s infinite ease-in-out;
+}
+
+/* Kayan Yıldız (Shooting Star) */
+@keyframes shooting {
+    0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 1; width: 0; }
+    70% { width: 100px; opacity: 1; }
+    100% { transform: translateX(-50vw) translateY(50vh) rotate(-45deg); opacity: 0; width: 0; }
+}
+.shooting-star {
+    position: fixed; right: -10vw; height: 2px;
+    background: linear-gradient(-45deg, rgba(255,255,255,1), rgba(255,255,255,0));
+    filter: drop-shadow(0 0 6px white); z-index: -1;
+    animation: shooting 3s infinite linear; opacity: 0;
+}
+
+/* Ekran Kenarı Buzlanma (Frost) */
+.frost-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    box-shadow: inset 0 0 100px rgba(255, 255, 255, 0.5), inset 0 0 40px rgba(255, 255, 255, 0.8);
+    pointer-events: none; z-index: 998; opacity: 0.8;
 }

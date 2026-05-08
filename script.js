@@ -71,8 +71,10 @@ $(document).ready(function() {
                 console.log(`İşte ${city} için temizlenmiş 5 GÜNLÜK ÖZET:`);
                 console.table(temizlenmisVeri); 
                 
-                // İLERİDE BURADA KÜBRA'NIN EFEKTİNİ TETİKLEYECEĞİZ
-                // Örn: createWeatherEffects(data.list[0].weather[0].main);
+                // ZEYNEP BURADA KÜBRA'NIN EFEKTİNİ TETİKLİYOR:
+                if (data.list && data.list[0]) {
+                    createWeatherEffects(data.list[0].weather[0].main);
+                }
             },
             error: function(jqXHR) {
                 if (jqXHR.status === 404) {
@@ -84,7 +86,7 @@ $(document).ready(function() {
         });
     }
 
-    // Sistemin test kodu
+    // Sistemin test kodu (Başlangıçta çalışır)
     getFiveDayForecastForCity('Ankara');
 
     // ==========================================
@@ -92,21 +94,39 @@ $(document).ready(function() {
     // ==========================================
     function createWeatherEffects(condition) {
         const $container = $('#weather-effects-container');
-        
-        // Yeni bir şehre tıklandığında önceki şehrin efektlerini temizle
-        $container.empty(); 
-
-        // API'den gelen durumu küçük harfe çevir
+        $container.empty(); // Eski efektleri temizle
         const weather = condition.toLowerCase();
+        
+        // Gece mi gündüz mü kontrolü (Yıldızlar veya Güneş için)
+        const hour = new Date().getHours();
+        const isNight = (hour >= 18 || hour < 6);
 
-        if (weather.includes('rain')) {
-            // Yağmurlu
+        if (weather.includes('thunder') || weather.includes('storm')) {
+            // 1. ŞİMŞEK EFEKTİ (Gök Gürültülü Fırtına)
+            $container.append('<div class="lightning-flash"></div>');
+            // Fırtınada aynı zamanda yağmur da yağsın
+            for (let i = 0; i < 40; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 0.8 + 0.2;
+                $container.append(`<div class="rain-drop" style="left:${left}vw; animation-duration:${duration}s"></div>`);
+            }
+        }
+        else if (weather.includes('rain')) {
+            // Yağmur
             for (let i = 0; i < 30; i++) {
                 let left = Math.random() * 100;
                 let duration = Math.random() * 1 + 0.5;
                 $container.append(`<div class="rain-drop" style="left:${left}vw; animation-duration:${duration}s"></div>`);
             }
         } 
+        else if (weather.includes('snow')) {
+            // Kar
+            for (let i = 0; i < 40; i++) {
+                let left = Math.random() * 100;
+                let duration = Math.random() * 3 + 2;
+                $container.append(`<div class="snow-flake" style="left:${left}vw; animation-duration:${duration}s">❄</div>`);
+            }
+        }
         else if (weather.includes('cloud')) {
             // Bulutlu
             for (let i = 0; i < 5; i++) {
@@ -117,38 +137,20 @@ $(document).ready(function() {
             }
         }
         else if (weather.includes('clear')) {
-            // Güneşli
-            $container.append('<div class="sun-glow"></div>');
-        }
-        else if (weather.includes('snow')) {
-            // Karlı
-            for (let i = 0; i < 40; i++) {
-                let left = Math.random() * 100;
-                let duration = Math.random() * 3 + 2;
-                $container.append(`<div class="snow-flake" style="left:${left}vw; animation-duration:${duration}s">❄</div>`);
+            // 2. YILDIZLI GECE VEYA GÜNEŞLİ GÜNDÜZ EFEKTİ
+            if (isNight) {
+                // Geceyse 50 tane parlayan yıldız ekle
+                for (let i = 0; i < 50; i++) {
+                    let left = Math.random() * 100;
+                    let top = Math.random() * 60; // Ekranın üst %60'lık kısmında çıksın
+                    let delay = Math.random() * 2;
+                    $container.append(`<div class="night-star" style="left:${left}vw; top:${top}vh; animation-delay:${delay}s"></div>`);
+                }
+            } else {
+                // Gündüzse güneş parlaması ekle
+                $container.append('<div class="sun-glow"></div>');
             }
-        }
-        else if (weather.includes('wind') || weather.includes('breeze')) {
-            // Rüzgarlı
-            for (let i = 0; i < 20; i++) {
-                let top = Math.random() * 100;
-                let duration = Math.random() * 0.5 + 0.5;
-                let delay = Math.random() * 2;
-                $container.append(`<div class="wind-line" style="top:${top}vh; animation-duration:${duration}s; animation-delay:${delay}s"></div>`);
-            }
-        } 
-        else if (weather.includes('hail')) {
-            // Dolu
-            for (let i = 0; i < 40; i++) {
-                let left = Math.random() * 100;
-                let duration = Math.random() * 0.3 + 0.2; 
-                $container.append(`<div class="hail-stone" style="left:${left}vw; animation-duration:${duration}s"></div>`);
-            }
-        }
-        else if (weather.includes('mist') || weather.includes('fog')) {
-            // Sisli
-            $container.append('<div class="fog-layer"></div>');
         }
     }
 
-});
+}); // <--- EN ÖNEMLİ KISIM BURASI: document.ready KAPANIŞI
