@@ -81,7 +81,7 @@ $(document).ready(function() {
         });
     }
 
-    // 3. FAVORİLER (Kübra & Beyza)
+   // 3. FAVORİLER (Kübra, Beyza & Zeynep)
     function renderFavorites() {
         const $container = $('#favorite-cities-container');
         $container.empty();
@@ -89,30 +89,74 @@ $(document).ready(function() {
             $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
             return;
         }
+
         favorites.forEach(city => {
+            // Her kart için benzersiz bir ID oluşturuyoruz (İçine dereceyi basabilmek için)
+            const cardId = `fav-card-${city.replace(/\s+/g, '-')}`;
+
             $container.append(`
                 <div class="col">
-                    <div class="card p-3 d-flex flex-row justify-content-between align-items-center shadow-sm">
-                        <span class="fav-city" style="cursor:pointer; font-weight:bold; font-size:1.1rem; color:#0d6efd;">${city}</span>
-                        <button class="btn btn-danger btn-sm remove-fav" data-city="${city}">Sil</button>
+                    <div class="card p-3 shadow-sm fav-card" data-city="${city}" style="cursor:pointer; border-left: 5px solid #0d6efd; transition: transform 0.2s;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <span style="font-weight:bold; font-size:1.1rem;">${city}</span>
+                            <button class="btn btn-danger btn-sm remove-fav" data-city="${city}">Sil</button>
+                        </div>
+                        <div id="${cardId}" class="mt-2 text-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
                     </div>
                 </div>
             `);
+
+            // Kuryeyi bu şehir için anlık veriyi getirmesi adına gönderiyoruz
+            getCurrentWeatherForFavorite(city, `#${cardId}`);
         });
     }
 
-    // Favori Silme
-    $(document).on('click', '.remove-fav', function() {
+    // YENİ: Sadece favori kartlarına anlık sıcaklık ve ikon çeken motor
+    function getCurrentWeatherForFavorite(city, targetElementId) {
+        // API'den "weather" (anlık) verisi istiyoruz
+        const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=tr`;
+
+        $.ajax({
+            url: currentUrl,
+            method: 'GET',
+            success: function(data) {
+                const temp = Math.round(data.main.temp);
+                const desc = data.weather[0].description;
+                const icon = data.weather[0].icon;
+                
+                // Veri gelince dönen animasyonu silip yerine dereceyi ve ikonu basıyoruz
+                $(targetElementId).html(`
+                    <div class="d-flex align-items-center mt-1">
+                        <img src="https://openweathermap.org/img/wn/${icon}.png" style="width:50px; margin-left:-10px;">
+                        <div class="ms-1 text-start">
+                            <span style="font-size:1.5rem; font-weight:bold; line-height:1;">${temp}°</span>
+                            <div class="text-capitalize text-muted" style="font-size:0.85rem;">${desc}</div>
+                        </div>
+                    </div>
+                `);
+            },
+            error: function() {
+                $(targetElementId).html('<small class="text-danger">Veri alınamadı</small>');
+            }
+        });
+    }
+
+  // Favori Silme
+    $(document).on('click', '.remove-fav', function(e) {
+        e.stopPropagation(); // ARAMAYI DURDURUR! Sadece silme işlemini yapar.
         const city = $(this).data('city');
         favorites = favorites.filter(c => c !== city);
         localStorage.setItem('favoriteCities', JSON.stringify(favorites));
         renderFavorites();
     });
 
-    // Favori Şehre Tıklayınca Hava Durumunu Getirme
-    $(document).on('click', '.fav-city', function() {
-        getFiveDayForecast($(this).text());
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // Yukarı kaydır
+    // Favori Şehre (Karta) Tıklayınca Hava Durumunu Getirme
+    $(document).on('click', '.fav-card', function() {
+        const city = $(this).data('city'); // Tıklanan kartın içindeki şehri al
+        getFiveDayForecast(city);          // O şehri motora gönder
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Sayfayı yukarı kaydır
     });
 
     // Favoriye Ekleme (LİMİT EKLENDİ)
