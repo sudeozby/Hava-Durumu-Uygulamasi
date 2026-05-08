@@ -126,3 +126,36 @@ body {
     0% { transform: translateY(0vh); }
     100% { transform: translateY(100vh); }
 }
+/* ==========================================
+   Sude'nin Favori Kartları Makyaj Bölümü 
+   ========================================== */
+
+/* 1. İKONLARI ORTALA VE GÜZELLEŞTİR */
+.fav-card img {
+    display: block;
+    margin: 5px auto; /* Üstten alttan boşluk bırak ve ortala */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); /* İkona derinlik katar */
+    transition: transform 0.3s ease;
+}
+
+.fav-card:hover img {
+    transform: scale(1.1); /* Üzerine gelince ikon hafifçe büyür */
+}
+
+/* 2. KARANLIK MODDA YAZI GÖRÜNÜRLÜĞÜ */
+/* Favori kartındaki her şeyin karanlıkta parlamasını sağlar */
+.dark-theme .fav-card .fw-bold,
+.dark-theme .fav-card .small,
+.dark-theme .fav-card span {
+    color: #f8fafc !important;
+}
+
+/* 3. KARTIN KENDİSİNİ BİRAZ DAHA BELİRGİN YAP */
+.fav-card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .fav-card {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}

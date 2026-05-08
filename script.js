@@ -117,30 +117,49 @@ $(document).ready(function() {
     // 4. FAVORİLER VE BUTONLAR (GÜNCEL)
     // ==========================================
 
-    function renderFavorites() {
-        const $container = $('#favorite-cities-container').empty();
-        if (favorites.length === 0) {
-            $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
-            return;
-        }
-        favorites.forEach(fav => {
-            // Sude, burada artık sadece isim değil, temp ve desc (hava durumu) da basıyoruz
-            $container.append(`
-                <div class="col">
-                    <div class="card p-3 glass-card fav-card text-center" data-city="${fav.name}">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="fw-bold"><i class="bi bi-geo-alt-fill me-1"></i>${fav.name}</span>
-                            <button class="btn btn-link text-danger p-0 remove-fav" data-city="${fav.name}">
-                                <i class="bi bi-x-circle"></i>
-                            </button>
-                        </div>
-                        <div class="small text-muted">${fav.temp} - ${fav.desc}</div>
-                    </div>
-                </div>
-            `);
-        });
-    }
+  // A. Favoriye Ekleme Butonu (add-to-fav-btn) kısmını güncelle:
+$('#add-to-fav-btn').on('click', function() {
+    const city = $('#forecast-city-name').text();
+    // Sıcaklık, açıklama VE İKON kodunu çekiyoruz
+    const temp = $('#forecast-cards-container .fw-bold').first().text();
+    const desc = $('#forecast-cards-container .small').first().text();
+    const iconCode = $('#forecast-cards-container img').first().attr('src').split('@')[0].split('/').pop(); // İkon kodunu ayıkla
 
+    if (city && !favorites.some(f => f.name === city)) {
+        // İkon kodunu da (icon) objeye ekle
+        favorites.push({ name: city, temp: temp, desc: desc, icon: iconCode });
+        localStorage.setItem('favoriteCities', JSON.stringify(favorites));
+        renderFavorites();
+        showNotification(`${city} favorilere eklendi!`, 'success');
+    } else {
+        showNotification("Zaten favorilerinizde!", "info");
+    }
+});
+
+// B. renderFavorites() fonksiyonunu güncelle (İkonu HTML'e ekle):
+function renderFavorites() {
+    const $container = $('#favorite-cities-container').empty();
+    if (favorites.length === 0) {
+        $container.html('<p class="text-center w-100">Henüz favori eklenmedi.</p>');
+        return;
+    }
+    favorites.forEach(fav => {
+        $container.append(`
+            <div class="col">
+                <div class="card p-3 glass-card fav-card text-center" data-city="${fav.name}">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-bold fav-city-title"><i class="bi bi-geo-alt-fill me-1"></i>${fav.name}</span>
+                        <button class="btn btn-link text-danger p-0 remove-fav" data-city="${fav.name}">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                    <img src="https://openweathermap.org/img/wn/${fav.icon}@2x.png" width="50" class="mx-auto" alt="${fav.desc}">
+                    <div class="small fav-weather-desc">${fav.temp} - ${fav.desc}</div>
+                </div>
+            </div>
+        `);
+    });
+}
     // Favori kartına tıklayınca o şehri tekrar ara
     $(document).on('click', '.fav-card', function() {
         getFiveDayForecast($(this).data('city'));
@@ -157,21 +176,24 @@ $(document).ready(function() {
         showNotification("Şehir listeden kaldırıldı.", "info"); // MAVİ ETİKET
     });
 
-    // Favoriye Ekleme (Yeşil Etiket Çıkartır)
-    $('#add-to-fav-btn').on('click', function() {
-        const city = $('#forecast-city-name').text();
-        const temp = $('#forecast-cards-container .fw-bold').first().text();
-        const desc = $('#forecast-cards-container .small').first().text();
+   // A. Favoriye Ekleme Butonu (add-to-fav-btn) kısmını güncelle:
+$('#add-to-fav-btn').on('click', function() {
+    const city = $('#forecast-city-name').text();
+    // Sıcaklık, açıklama VE İKON kodunu çekiyoruz
+    const temp = $('#forecast-cards-container .fw-bold').first().text();
+    const desc = $('#forecast-cards-container .small').first().text();
+    const iconCode = $('#forecast-cards-container img').first().attr('src').split('@')[0].split('/').pop(); // İkon kodunu ayıkla
 
-        if (city && !favorites.some(f => f.name === city)) {
-            favorites.push({ name: city, temp: temp, desc: desc });
-            localStorage.setItem('favoriteCities', JSON.stringify(favorites));
-            renderFavorites();
-            showNotification(`${city} favorilere eklendi!`, 'success'); // YEŞİL ETİKET
-        } else {
-            showNotification("Zaten favorilerinizde!", "info"); // MAVİ ETİKET
-        }
-    });
+    if (city && !favorites.some(f => f.name === city)) {
+        // İkon kodunu da (icon) objeye ekle
+        favorites.push({ name: city, temp: temp, desc: desc, icon: iconCode });
+        localStorage.setItem('favoriteCities', JSON.stringify(favorites));
+        renderFavorites();
+        showNotification(`${city} favorilere eklendi!`, 'success');
+    } else {
+        showNotification("Zaten favorilerinizde!", "info");
+    }
+});
 
     $('#get-weather-btn').on('click', function() {
         const city = $('#city-input').val().trim();
