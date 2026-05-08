@@ -267,7 +267,7 @@ function displayForecastToHTML(dailyForecasts, cityName) {
         dailyForecasts.forEach(day => {
             $container.append(`
                 <div class="col">
-                    <div class="card weather-card text-center p-3 h-100 glass-card border-0" data-cond="${day.mainCond}">
+                    <div class="card weather-card text-center p-3 h-100 glass-card" data-cond="${day.mainCond}">
                         <h6>${day.tarih}</h6>
                         <img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" width="70" alt="${day.durum}">
                         <div class="fw-bold">${day.enYuksek}°</div>
