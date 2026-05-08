@@ -25,16 +25,18 @@ $(document).ready(function() {
     const apiKey = '5c03ce0373390aff630bcb6f7aac303b'; 
     const forecastApiUrlBase = 'https://api.openweathermap.org/data/2.5/forecast';
     
-    function processForecastData(forecastList) {
+   function processForecastData(forecastList) {
         const dailyData = {};
         
         forecastList.forEach(item => {
             const date = item.dt_txt.split(' ')[0]; 
             if (!dailyData[date]) {
-                dailyData[date] = { temps: [], weatherDescriptions: [] };
+                // İkonları biriktirmek için 'icons: []' eklendi
+                dailyData[date] = { temps: [], weatherDescriptions: [], icons: [] };
             }
             dailyData[date].temps.push(item.main.temp); 
             dailyData[date].weatherDescriptions.push(item.weather[0].description);
+            dailyData[date].icons.push(item.weather[0].icon); // İkonu torbaya at
         });
 
         const processedDailyArray = [];
@@ -44,16 +46,43 @@ $(document).ready(function() {
             const minTemp = Math.min(...day.temps); 
             const maxTemp = Math.max(...day.temps); 
             const description = day.weatherDescriptions[Math.floor(day.weatherDescriptions.length / 2)]; 
+            const icon = day.icons[Math.floor(day.icons.length / 2)]; // Günün ikonunu seç
 
             processedDailyArray.push({
                 tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'short' }),
                 enDusuk: Math.round(minTemp),
                 enYuksek: Math.round(maxTemp),
-                durum: description
+                durum: description,
+                ikon: icon // Pakete ikonu da ekle
             });
         }
         
         return processedDailyArray.slice(0, 5);
+    }
+    // Temizlenen Veriyi HTML Kartlarına Çevirme
+    function displayForecastToHTML(dailyForecasts, cityName) {
+        const $container = $('#forecast-cards-container');
+        const $title = $('#forecast-city-name');
+        
+        $container.empty(); // Önceki şehirden kalan kartları temizle
+        $title.text(`${cityName} İçin 5 Günlük Hava Tahmini`).show(); // Başlığı göster
+
+        // 5 günlük veriyi dönüp kart oluşturuyoruz
+        dailyForecasts.forEach(day => {
+            const iconUrl = `https://openweathermap.org/img/w/${day.ikon}.png`; 
+            
+            const cardHTML = `
+                <div class="col">
+                    <div class="metric-card">
+                        <h5 class="card-title">${day.tarih}</h5>
+                        <img src="${iconUrl}" alt="${day.durum}" style="width: 80px; height: 80px;">
+                        <p class="metric-value mb-1">${day.enYuksek}° <span style="font-size:1rem; color:#888;">/ ${day.enDusuk}°</span></p>
+                        <p class="metric-label text-capitalize">${day.durum}</p>
+                    </div>
+                </div>
+            `;
+            $container.append(cardHTML);
+        });
     }
 
     function getFiveDayForecastForCity(city) {
@@ -64,14 +93,13 @@ $(document).ready(function() {
         $.ajax({
             url: requestUrl,
             method: 'GET',
-            success: function(data) {
-                console.log("Ham Veri Geldi! İçinde 40 tane 3 saatlik tahmin var:", data);
+           success: function(data) {
                 const temizlenmisVeri = processForecastData(data.list);
                 
-                console.log(`İşte ${city} için temizlenmiş 5 GÜNLÜK ÖZET:`);
-                console.table(temizlenmisVeri); 
+                // Konsola yazmayı bıraktık, artık HTML'e fırlatıyoruz!
+                displayForecastToHTML(temizlenmisVeri, data.city.name); 
                 
-                // ZEYNEP BURADA KÜBRA'NIN EFEKTİNİ TETİKLİYOR:
+                // Kübra'nın Efektlerini Tetikliyoruz
                 if (data.list && data.list[0]) {
                     createWeatherEffects(data.list[0].weather[0].main);
                 }
@@ -86,8 +114,23 @@ $(document).ready(function() {
         });
     }
 
-    // Sistemin test kodu (Başlangıçta çalışır)
-    getFiveDayForecastForCity('Ankara');
+   // Arama Butonuna Tıklanınca Çalışacak Kodlar
+    $('#get-weather-btn').on('click', function() {
+        const city = $('#city-input').val().trim(); // Inputtaki yazıyı al
+        if (city !== "") {
+            getFiveDayForecastForCity(city);
+        } else {
+            alert("Lütfen bir şehir adı girin.");
+        }
+    });
+
+    // Arama kutusundayken Enter tuşuna basınca da çalışsın
+    $('#city-input').keypress(function(event) {
+        if (event.which === 13) { 
+            event.preventDefault(); 
+            $('#get-weather-btn').click(); 
+        }
+    });
 
     // ==========================================
     // KÜBRA'NIN GÖREVİ: Dinamik Hava Durumu Efektleri
