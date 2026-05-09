@@ -58,7 +58,6 @@ body {
     pointer-events: none; /* Üstte olsa bile butonlara tıklamanı engellemez */
 }
 
-
 /* Input içindeki placeholder (ipucu) yazısı rengi */
 .dark-theme .form-control::placeholder {
     color: rgba(255, 255, 255, 0.5);
@@ -113,19 +112,26 @@ body {
 /* YAĞMUR DAMLASI - HEM AYDINLIK HEM KARANLIK MOD UYUMLU */
 /* YAĞMUR DAMLASI - GARANTİLİ GÖRÜNÜRLÜK */
 /* Genel Damla Yapısı */
+/* ==========================================
+   YAĞMUR VE AY GÖRÜNÜRLÜK PAKETİ
+   ========================================== */
+
+/* 1. YAĞMUR DAMLASI (Genel ve Karanlık Mod) */
 .rain-drop {
     position: fixed;
-    width: 3px !important; /* Biraz kalınlaştırdık */
-    height: 25px !important; /* Biraz uzattık */
-    background: rgba(255, 255, 255, 0.8); /* Karanlık modda beyaz */
-    animation: rain linear infinite;
+    top: -20px;
+    width: 2.5px !important;
+    height: 22px !important;
+    background: rgba(0, 200, 255, 0.8) !important; /* Karanlıkta Turkuaz */
+    z-index: 9999 !important;
+    pointer-events: none;
+    animation: rain-fall-new linear infinite; /* Animasyon ismi tutmalı */
 }
 
-/* AYDINLIK MODDA ÖZEL AYAR (İşte Sihir Burada) */
+/* 2. AYDINLIK MOD YAĞMUR (Lacivert) */
 .light-theme .rain-drop {
-    background: #104e8b !important; /* Çok koyu ve net bir lacivert */
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Beyazda parlaması için hafif gölge */
-    opacity: 1 !important; /* Saydamlığı tamamen kapattık, tam görünür yaptık */
+    background: #004a99 !important; /* Beyaz arka planda parlayan lacivert */
+    opacity: 0.9 !important;
 }
 
 /* GÜNEŞLİ (Yumuşak Gün Işığı) */
@@ -162,10 +168,17 @@ body {
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.2); /* Hafif gölge ekledik ki beyazın üstünde patlasın */
 }
 
-@keyframes rain {
-    0% { transform: translateY(0vh); }
-    100% { transform: translateY(100vh); }
+/* 4. ANİMASYON (Yağmurun düşmesi için şart) */
+@keyframes rain-fall-new {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(110vh); }
 }
+
+
+
+
+
+
 /* ==========================================
    Sude'nin Favori Kartları Makyaj Bölümü 
    ========================================== */
@@ -211,7 +224,6 @@ body {
 .dark-theme .fav-card span {
     color: #ffffff !important;
 }
-/* --- style.css Sonuna Ekle --- */
 
 /* Ay İkonu Özel Stili */
 .text-moon {
