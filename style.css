@@ -329,10 +329,12 @@ body {
 .glass-header h1 {
     background: linear-gradient(45deg, #1e3a8a, #3b82f6);
     -webkit-background-clip: text;
+    -webkit-background-clip: text; /* Chrome ve Safari için */
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 1.8rem;
     letter-spacing: -1px;
-}
+}   
 
 /* Kartların üzerine hafif bir parıltı ekleyelim */
 .glass-card {
