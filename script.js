@@ -279,6 +279,41 @@ function createWeatherEffects(condition, iconCode) {
     else if (w.includes('cloud')) {
         $('body').addClass('cloudy-bg');
     }
+    function createWeatherEffects(condition, iconCode) {
+    const $c = $('#weather-effects-container').empty();
+    const w = condition.toLowerCase();
+
+    $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
+
+    // A) YAĞMUR EFEKTİ
+    if (w.includes('rain')) {
+        $('body').addClass('rainy-bg');
+        for(let i=0; i<80; i++) {
+            $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s; animation-delay:${Math.random()}s"></div>`);
+        }
+    } 
+    // B) GÜNEŞLİ / AÇIK HAVA
+    else if (w.includes('clear')) {
+        if (iconCode && !iconCode.includes('n')) {
+            $('body').addClass('sunny-bg');
+            // GÜNEŞ: Ekrana bir güneş objesi ekliyoruz
+            $c.append('<div class="sun-effect"><div class="sun-rays"></div></div>');
+        } else {
+            // Gece ise yıldızlar oluştur
+            for(let i=0; i<40; i++) {
+                $c.append(`<div class="star" style="top:${Math.random()*100}vh; left:${Math.random()*100}vw; animation-delay:${Math.random()*2}s"></div>`);
+            }
+        }
+    } 
+    // C) BULUTLU HAVA
+    else if (w.includes('cloud')) {
+        $('body').addClass('cloudy-bg');
+        // BULUTLAR: Ekranda yavaşça yüzen 5-6 büyük bulut katmanı
+        for(let i=0; i<6; i++) {
+            $c.append(`<div class="cloud-particle" style="top:${10 + Math.random()*40}vh; animation-duration:${20 + Math.random()*10}s; animation-delay:${-Math.random()*20}s"></div>`);
+        }
+    }
+}
 }
 
 // AY'IN GÖZÜKMESİ İÇİN: 258. satırdaki displayForecastToHTML fonksiyonunu bununla değiştir

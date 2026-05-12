@@ -204,3 +204,47 @@ body {
     filter: drop-shadow(0 0 10px rgba(241, 196, 15, 0.6)); /* Parlama efekti */
     display: block;
 }
+/* --- YENİ HAVA DURUMU EFEKTLERİ --- */
+
+/* 1. GÜNEŞ EFEKTİ: Köşede parlayan ve dönen ışınlar */
+.sun-effect {
+    position: fixed;
+    top: 60px;
+    right: 60px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, #f1c40f 0%, #f39c12 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 80px #f1c40f;
+    z-index: 1; /* Arka planda kalsın */
+}
+.sun-rays {
+    position: absolute;
+    top: -30px; left: -30px; right: -30px; bottom: -30px;
+    background: repeating-conic-gradient(from 0deg, rgba(241, 196, 15, 0.15) 0deg 15deg, transparent 15deg 30deg);
+    border-radius: 50%;
+    animation: rotate-sun 25s linear infinite;
+}
+
+/* 2. BULUT EFEKTİ: Yavaşça kayan yumuşak bulutlar */
+.cloud-particle {
+    position: fixed;
+    width: 300px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 50px;
+    filter: blur(20px); /* Bulutsu yumuşaklık verir */
+    z-index: 1;
+    animation: float-clouds linear infinite;
+}
+
+/* 3. GECE YILDIZLARI */
+.star {
+    position: fixed;
+    width: 2px; height: 2px;
+    background: white;
+    border-radius: 50%;
+    z-index: 1;
+    animation: twinkle 1.5s infinite alternate;
+}
+
