@@ -358,3 +358,41 @@ body {
 .dark-theme .hour-box .text-primary {
     color: #60a5fa !important; /* Açık mavi, karanlıkta daha iyi durur */
 }
+
+/* 2. YENİ EKLENECEK DETAY KARTININ STİLLERİ */
+#weather-details-container .card {
+    background-color: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid rgba(128, 128, 128, 0.2) !important;
+    border-radius: 20px;
+}
+
+/* Hover durumundaki değişimler (Görsel 360-363 arası) */
+#weather-details-container .card:hover {
+    transform: translateY(-5px) scale(1.02);
+    background: rgba(128, 128, 128, 0.15) !important;
+    border-color: var(--text-color) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Kaydırma çubuğunu (Scrollbar) daha modern yapalım */
+#weather-details-container .d-flex::-webkit-scrollbar {
+    height: 8px;
+}
+
+#weather-details-container .d-flex::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.4);
+    border-radius: 10px;
+}
+
+/* Animasyon kısmı */
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
