@@ -62,27 +62,34 @@ $(document).ready(function() {
         });
     }
 
-    function processForecastData(list) {
-        const daily = {};
-        list.forEach(item => {
-            const date = item.dt_txt.split(' ')[0];
-            if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [], mainCond: [] };
-            daily[date].temps.push(item.main.temp);
-            daily[date].icons.push(item.weather[0].icon);
-            daily[date].desc.push(item.weather[0].description);
-            daily[date].mainCond.push(item.weather[0].main);
-        });
+ function processForecastData(list) {
+    const daily = {};
+    
+    // Verileri tarihlere göre grupluyoruz [cite: 132-135]
+    list.forEach(item => {
+        const date = item.dt_txt.split(' ')[0];
+        if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [], mainCond: [] };
+        
+        daily[date].temps.push(item.main.temp);
+        daily[date].icons.push(item.weather[0].icon);
+        daily[date].desc.push(item.weather[0].description);
+        daily[date].mainCond.push(item.weather[0].main);
+    });
 
-        return Object.keys(daily).slice(0, 5).map(date => {
-            return {
-                tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }),
-                enYuksek: Math.round(Math.max(...daily[date].temps)),
-                durum: daily[date].desc[0],
-                ikon: daily[date].icons[0], // İsim uyuşmazlığı giderildi
-                mainCond: daily[date].mainCond[0]
-            };
-        });
-    }
+    return Object.keys(daily).slice(0, 5).map(date => {
+        // --- KRİTİK DOKUNUŞ: Gündüz ikonunu bulmaya çalışıyoruz ---
+        // Liste içinde 'd' (day) olan ikonu bul, yoksa ilkini al
+        const gunIcindekiIkon = daily[date].icons.find(i => i.includes('d')) || daily[date].icons[0];
+
+        return {
+            tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }),
+            enYuksek: Math.round(Math.max(...daily[date].temps)),
+            durum: daily[date].desc[0],
+            ikon: gunIcindekiIkon, // Bu isim 'displayForecastToHTML' ile uyuşmalı [cite: 266]
+            mainCond: daily[date].mainCond[0]
+        };
+    });
+}
 
     function displayForecastToHTML(dailyForecasts, cityName) {
         const $container = $('#forecast-cards-container').empty();
@@ -272,4 +279,4 @@ $(document).ready(function() {
         updateClock();
     }
 
-}); // <--- ANA BLOĞUN KAPANMASI ŞİMDİ DOĞRU YERDE!
+}); 
