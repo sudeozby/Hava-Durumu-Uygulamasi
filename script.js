@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    localStorage.clear(); // Temiz bir başlangıç
+    
 
     // =================================================================
     // GENEL DEĞİŞKENLER
