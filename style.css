@@ -39,8 +39,33 @@ body {
 /* Görünür hale getiren sınıf */
 .toast-message.show { transform: translateX(0); }
 
-/* Cam Efekti Kartları */
-.glass-card { background: var(--card-bg) !important; backdrop-filter: blur(10px); border-radius: 20px; }
+
+/* 1. KARTLARIN TEMEL CAM EFEKTİ (Her iki mod için ortak kural) */
+.glass-card, .details-glass-card { 
+    backdrop-filter: blur(10px); 
+    border-radius: 20px; 
+}
+
+/* 2. ANA KARTLAR: Bütünle Uyumlu, Şeffaf ve Soft Buzlu Mavi */
+.light-theme .glass-card {
+    background: linear-gradient(135deg, rgba(180, 215, 255, 0.6) 0%, rgba(230, 245, 255, 0.75) 100%) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important; /* Etrafına parlak beyaz cam kesiği ekledik */
+    box-shadow: 0 8px 25px rgba(0, 50, 150, 0.05) !important; /* Gölgeyi iyice hafifletip yumuşattık */
+}
+/* 3. DETAY PANELİ: Tam Gün Analizi - Güneşli/Bulutlu Tema (Bir tık daha belirgin) */
+.light-theme .details-glass-card {
+    background: linear-gradient(120deg, rgba(190, 225, 250, 0.95) 0%, rgba(255, 248, 200, 0.95) 100%) !important;
+    border: 1px solid rgba(150, 210, 250, 0.8) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(0, 50, 150, 0.12) !important;
+}
+
+/* 4. DETAY PANELİ SAATLİK KUTULAR (Aydınlık Mod) */
+.light-theme .details-glass-card .hour-box {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+}
 
 /* Tıklanan Kart */
 .weather-card { cursor: pointer; transition: transform 0.3s; }
@@ -146,6 +171,21 @@ body {
 /* BULUTLU (Sakin Gökyüzü) */
 .light-theme.cloudy-bg { 
     background: linear-gradient(135deg, #F5F5F5 0%, #CFD8DC 100%) !important; 
+}
+/* Aydınlık mod - Bir tık daha koyu soft mavi gradyan */
+
+/* Aydınlık Mod - Favori Kartlarına Özel Soft Lila/Mor Gradyan */
+.light-theme .fav-card {
+    background: linear-gradient(135deg, rgba(72, 44, 142, 0.9) 0%, rgba(245, 240, 255, 0.95) 100%) !important;
+    border: 1px solid rgba(74, 37, 158, 0.6) !important;
+    box-shadow: 0 6px 18px rgba(90, 45, 130, 0.08) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Üzerine gelince çok hafif yukarı kalkma efekti (Bonus UX) */
+.light-theme .fav-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(90, 45, 130, 0.12) !important;
 }
 
 /* --- BAŞLIK VE YAZI DÜZELTMELERİ --- */
@@ -340,4 +380,76 @@ body {
 .glass-card {
     border: 1px solid rgba(255, 255, 255, 0.4) !important;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
+}
+/* --- ARAMA ÇUBUĞU (Yeni Koyu Mavi Kartlara Uyumlu) --- */
+body.light-theme #city-input {
+    background: linear-gradient(135deg, rgba(165, 195, 255, 0.6) 0%, rgba(195, 215, 255, 0.7) 100%) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(130, 165, 255, 0.8) !important;
+    border-radius: 20px !important;
+    color: #627fce !important; /* Koyu mavi yazı */
+    font-weight: 500 !important;
+    transition: all 0.3s ease;
+}
+
+/* Arama çubuğuna tıklandığındaki parlama efekti */
+body.light-theme #city-input:focus {
+    background: linear-gradient(135deg, rgba(219, 239, 72, 0.228) 0%, rgba(195, 215, 255, 1) 100%) !important;
+    border-color: rgb(208, 178, 4) !important;
+    box-shadow: 0 0 15px rgba(116, 140, 214, 0.196) !important;
+    outline: none !important;
+}
+
+/* "Şehir ara..." yazısının rengi */
+body.light-theme #city-input::placeholder {
+    color: rgba(30, 58, 138, 0.6) !important;
+}
+/* --- ARAMA PANELİ (Detay Paneliyle Aynı Güneşli/Bulutlu Tema) --- */
+.light-theme .search-box-panel {
+    background: linear-gradient(120deg, rgba(190, 225, 250, 0.95) 0%, rgba(255, 248, 200, 0.95) 100%) !important;
+    border: 1px solid rgba(150, 210, 250, 0.8) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(0, 50, 150, 0.12) !important;
+}
+/* ==========================================
+   KARANLIK MOD (DARK THEME) DÜZELTME PAKETİ
+   ========================================== */
+
+/* 1. Arama Paneli ve Detay Paneli (Karanlık Modda Gece Teması) */
+.dark-theme .search-box-panel, 
+.dark-theme .details-glass-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 2. Ana Hava Durumu Kartları (Karanlık Modda Şeffaf Gece Mavisi) */
+.dark-theme .glass-card {
+    background: rgba(30, 41, 59, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+}
+
+/* 3. Arama Çubuğu (Input) Karanlık Modda Görünürlük */
+.dark-theme #city-input {
+    background: rgba(15, 23, 42, 0.8) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark-theme #city-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 4. Tüm Yazıların Beyaz Kalmasını Garanti Altına Alalım */
+.dark-theme h1, .dark-theme h2, .dark-theme h3, .dark-theme h5, 
+.dark-theme p, .dark-theme span, .dark-theme div {
+    color: #f8fafc !important;
+}
+
+/* 5. Saatlik Kutucuklar (Karanlık Mod Detay Paneli İçin) */
+.dark-theme .hour-box {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
 }

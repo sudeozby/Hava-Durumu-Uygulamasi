@@ -220,7 +220,7 @@ $(document).ready(function() {
 
         if (dayData.length > 0) {
             let hourlyHtml = `
-                <div class="card glass-card p-4 border-0 shadow-sm mb-5">
+                <div class="card details-glass-card p-4 border-0 shadow-sm mb-5">
                     <h4 class="mb-4 text-center border-bottom pb-2">${selectedDate} - Tam Gün Analizi</h4>
                     <div class="row text-center mb-4">
                         <div class="col-4"><strong>Hissedilen</strong><br>${Math.round(dayData[0].main.feels_like)}°</div>
