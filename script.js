@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    
 
     // =================================================================
     // GENEL DEĞİŞKENLER
@@ -10,6 +9,7 @@ $(document).ready(function() {
 
     applyThemeByTime();
     renderFavorites();
+    startClock(); // Saat fonksiyonunu burada başlatıyoruz
 
     // =================================================================
     // 1. TEMA YÖNETİMİ
@@ -45,10 +45,11 @@ $(document).ready(function() {
             url: url,
             method: 'GET',
             success: function(data) {
-                rawDataList = data.list; // Hafızaya al
+                rawDataList = data.list; 
                 const temizVeri = processForecastData(data.list);
                 displayForecastToHTML(temizVeri, data.city.name);
-                createWeatherEffects(data.list[0].weather[0].main); 
+                // DÜZELTME: Hem condition hem iconCode gönderilmeli
+                createWeatherEffects(data.list[0].weather[0].main, data.list[0].weather[0].icon); 
                 $('#add-to-fav-btn').fadeIn();
                 $('#weather-details-container').hide(); 
             },
@@ -73,71 +74,72 @@ $(document).ready(function() {
         });
 
         return Object.keys(daily).slice(0, 5).map(date => {
-            const rawIcon = daily[date].icons[0];
-            const mainCond = daily[date].mainCond[0];
-            let finalIconHtml = "";
-
-            // AY KONTROLÜ: Gece ve Hava Açıksa Ay koy
-            if (rawIcon.includes('n') && mainCond === 'Clear') {
-                finalIconHtml = `<i class="bi bi-moon-stars-fill text-moon fs-1 mx-auto my-3 d-block"></i>`;
-            } else {
-                finalIconHtml = `<img src="https://openweathermap.org/img/wn/${rawIcon}@2x.png" class="mx-auto" width="70">`;
-            }
-
             return {
-                // MAYIS YAZDIRMA BURADA
                 tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }),
                 enYuksek: Math.round(Math.max(...daily[date].temps)),
                 durum: daily[date].desc[0],
-                ikonHtml: finalIconHtml,
-                mainCond: mainCond
+                ikon: daily[date].icons[0], // İsim uyuşmazlığı giderildi
+                mainCond: daily[date].mainCond[0]
             };
         });
     }
-}
 
-// AY'IN GÖZÜKMESİ İÇİN: 258. satırdaki displayForecastToHTML fonksiyonunu bununla değiştir
-function displayForecastToHTML(dailyForecasts, cityName) {
-    const $container = $('#forecast-cards-container').empty();
-    $('#forecast-city-name').text(cityName).show();
+    function displayForecastToHTML(dailyForecasts, cityName) {
+        const $container = $('#forecast-cards-container').empty();
+        $('#forecast-city-name').text(cityName).show();
 
-    dailyForecasts.forEach(day => {
-        let ikonHtml = '';
-        // Gece ('n' harfi) ve Hava Açık ('Clear') ise Ay koy
-        if (day.ikon && day.ikon.includes('n') && day.mainCond === 'Clear') {
-            ikonHtml = `<i class="bi bi-moon-stars-fill text-moon fs-1 mx-auto my-3"></i>`;
-        } else {
-            ikonHtml = `<img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto" width="70">`;
-        }
+        dailyForecasts.forEach(day => {
+            let ikonHtml = '';
+            // Gece ('n' harfi) ve Hava Açık ('Clear') ise Ay koy
+            if (day.ikon && day.ikon.includes('n') && day.mainCond === 'Clear') {
+                ikonHtml = `<i class="bi bi-moon-stars-fill text-moon fs-1 mx-auto my-3 d-block"></i>`;
+            } else {
+                ikonHtml = `<img src="https://openweathermap.org/img/wn/${day.ikon}@2x.png" class="mx-auto d-block" width="70">`;
+            }
 
-        $container.append(`
-            <div class="col">
-                <div class="card weather-card text-center p-3 h-100 glass-card" data-cond="${day.mainCond}">
-                    <h6>${day.tarih}</h6>
-                    ${ikonHtml}
-                    <div class="fw-bold">${day.enYuksek}°</div>
-                    <p class="small text-capitalize mb-0">${day.durum}</p>
+            $container.append(`
+                <div class="col">
+                    <div class="card weather-card text-center p-3 h-100 glass-card border-0" data-cond="${day.mainCond}">
+                        <h6>${day.tarih}</h6>
+                        ${ikonHtml}
+                        <div class="fw-bold">${day.enYuksek}°</div>
+                        <p class="small text-capitalize mb-0">${day.durum}</p>
+                    </div>
                 </div>
-            </div>
-        `);
-    });
-}
+            `);
+        });
+    }
 
     // =================================================================
     // 3. EFEKT MOTORU
     // =================================================================
-    function createWeatherEffects(condition) {
+    function createWeatherEffects(condition, iconCode) {
         const $c = $('#weather-effects-container').empty();
         const w = condition.toLowerCase();
+
         $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
 
         if (w.includes('rain')) {
             $('body').addClass('rainy-bg');
-            for(let i=0; i<50; i++) $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s"></div>`);
-        } else if (w.includes('clear')) {
-            $('body').addClass('sunny-bg');
-        } else {
+            for(let i=0; i<80; i++) {
+                $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s; animation-delay:${Math.random()}s"></div>`);
+            }
+        } 
+        else if (w.includes('clear')) {
+            if (iconCode && !iconCode.includes('n')) {
+                $('body').addClass('sunny-bg');
+                $c.append('<div class="sun-effect"><div class="sun-rays"></div></div>');
+            } else {
+                for(let i=0; i<40; i++) {
+                    $c.append(`<div class="star" style="top:${Math.random()*100}vh; left:${Math.random()*100}vw; animation-delay:${Math.random()*2}s"></div>`);
+                }
+            }
+        } 
+        else if (w.includes('cloud')) {
             $('body').addClass('cloudy-bg');
+            for(let i=0; i<6; i++) {
+                $c.append(`<div class="cloud-particle" style="top:${10 + Math.random()*40}vh; animation-duration:${20 + Math.random()*10}s; animation-delay:${-Math.random()*20}s"></div>`);
+            }
         }
     }
 
@@ -158,7 +160,7 @@ function displayForecastToHTML(dailyForecasts, cityName) {
                             <span class="fw-bold"><i class="bi bi-geo-alt-fill"></i> ${fav.name}</span>
                             <button class="btn btn-link text-danger p-0 remove-fav" data-city="${fav.name}"><i class="bi bi-x-circle"></i></button>
                         </div>
-                        <img src="https://openweathermap.org/img/wn/${fav.icon}@2x.png" class="fav-icon-img" alt="${fav.desc}">
+                        <img src="https://openweathermap.org/img/wn/${fav.icon}@2x.png" class="mx-auto" width="50" alt="${fav.desc}">
                         <div class="small mt-2">${fav.temp} - ${fav.desc}</div>
                     </div>
                 </div>
@@ -213,7 +215,6 @@ function displayForecastToHTML(dailyForecasts, cityName) {
         setTimeout(() => { $toast.removeClass('show'); }, 3000);
     }
 
-    // KART TIKLAMA VE 24 SAAT ANALİZİ
     $(document).on('click', '.weather-card', function() {
         $('.weather-card').removeClass('active');
         $(this).addClass('active');
@@ -223,7 +224,7 @@ function displayForecastToHTML(dailyForecasts, cityName) {
 
         const dayData = rawDataList.filter(item => {
             const itemDate = new Date(item.dt_txt).toLocaleDateString('tr-TR', { 
-                weekday: 'long', day: 'numeric', month: 'long' // Filtreleme için long ayarı
+                weekday: 'long', day: 'numeric', month: 'long' 
             }).trim();
             return itemDate === selectedDate;
         });
@@ -258,23 +259,17 @@ function displayForecastToHTML(dailyForecasts, cityName) {
             window.scrollTo({ top: $details.offset().top - 120, behavior: 'smooth' });
         }
     });
-});
-// CANLI SAAT FONKSİYONU
-function startClock() {
-    function updateClock() {
-        const now = new Date();
-        // Saati 14:30:05 formatında, Türkiye yerel saatine göre alır
-        const timeStr = now.toLocaleTimeString('tr-TR', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        });
-        $('#live-clock').text(timeStr);
-    }
-    
-    setInterval(updateClock, 1000); // Her saniye güncelle
-    updateClock(); // Sayfa açılır açılmaz saati göster
-}
 
-// Fonksiyonu başlat
-startClock();
+    function startClock() {
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('tr-TR', { 
+                hour: '2-digit', minute: '2-digit', second: '2-digit' 
+            });
+            $('#live-clock').text(timeStr);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    }
+
+}); // <--- ANA BLOĞUN KAPANMASI ŞİMDİ DOĞRU YERDE!
