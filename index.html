@@ -14,6 +14,7 @@
     <header class="py-3 shadow-sm border-bottom glass-header sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
             <h1 class="h3 mb-0 fw-bold">Hava Durumu Merkezi</h1>
+         <div id="live-clock" class="fw-bold text-primary fs-5" style="letter-spacing: 1px;"></div>
             <button id="theme-toggle-btn" class="btn btn-outline-primary rounded-pill">
                 <i class="bi bi-moon-stars-fill"></i> Mod Değiştir
             </button>
@@ -21,7 +22,7 @@
     </header>
 
    <main class="container my-5">
-        <div class="card p-4 mb-4 shadow-sm glass-card">
+        <div class="card p-4 mb-4 shadow-sm glass-card search-box-panel">
             <h2 class="h5 mb-3">Şehir Ara</h2>
             <div class="input-group">
                 <input type="text" class="form-control border-0 bg-light" id="city-input" placeholder="Şehir adı girin (Örn: Ankara)...">
@@ -36,6 +37,8 @@
             </div>
             
             <div id="forecast-cards-container" class="row row-cols-1 row-cols-md-5 g-3 mb-5"></div>
+<div id="weather-details-container" class="mt-4" style="display:none;"></div>
+
 
             <div class="card glass-card p-4 border-0 shadow-sm my-4" id="chart-section" style="display:none; border-radius: 20px;">
                 <h5 class="fw-bold mb-3"><i class="bi bi-graph-up text-primary me-2"></i>Günlük Sıcaklık Değişimi</h5>
