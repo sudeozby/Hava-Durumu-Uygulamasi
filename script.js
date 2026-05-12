@@ -249,3 +249,22 @@ $(document).ready(function() {
         }
     });
 });
+// CANLI SAAT FONKSİYONU
+function startClock() {
+    function updateClock() {
+        const now = new Date();
+        // Saati 14:30:05 formatında, Türkiye yerel saatine göre alır
+        const timeStr = now.toLocaleTimeString('tr-TR', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        });
+        $('#live-clock').text(timeStr);
+    }
+    
+    setInterval(updateClock, 1000); // Her saniye güncelle
+    updateClock(); // Sayfa açılır açılmaz saati göster
+}
+
+// Fonksiyonu başlat
+startClock();
