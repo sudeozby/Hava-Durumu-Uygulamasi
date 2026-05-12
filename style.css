@@ -314,3 +314,47 @@ body {
     z-index: 1;
     animation: twinkle 1.5s infinite alternate;
 }
+/* =================================================================
+   KOYU MOD GÖRÜNÜRLÜK VE YAZI DÜZELTMESİ
+   ================================================================= */
+
+/* 1. Tüm Kartların Arka Planını Zorla Karart */
+.dark-theme .card, 
+.dark-theme .glass-card, 
+.dark-theme .weather-card, 
+.dark-theme .details-glass-card,
+.dark-theme .hour-box,
+.dark-theme .search-box-panel {
+    background: rgba(15, 23, 42, 0.95) !important; /* Koyu lacivert/füme */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 2. Tüm Yazıları Beyaz/Açık Gri Yap (Okunabilirlik İçin) */
+.dark-theme h1, .dark-theme h2, .dark-theme h3, 
+.dark-theme h4, .dark-theme h5, .dark-theme h6,
+.dark-theme p, .dark-theme span, .dark-theme div,
+.dark-theme #forecast-city-name, .dark-theme #live-clock {
+    color: #f8fafc !important; /* Off-white rengi, gözü yormaz */
+}
+
+/* 3. Arama Çubuğunu (Input) Karart ve Yazısını Beyaz Yap */
+.dark-theme #city-input {
+    background: rgba(30, 41, 59, 0.8) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.dark-theme #city-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* 4. Analiz Kısmındaki Strong (Kalın) Yazılar */
+.dark-theme strong {
+    color: #ffffff !important;
+}
+
+/* 5. Alt Kısımdaki Saatlik Kutuların İçindeki Saat Yazısı */
+.dark-theme .hour-box .text-primary {
+    color: #60a5fa !important; /* Açık mavi, karanlıkta daha iyi durur */
+}
