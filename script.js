@@ -11,18 +11,22 @@ $(document).ready(function() {
     applyThemeByTime();
     renderFavorites();
 
-    // =================================================================
     // 1. TEMA YÖNETİMİ
     // =================================================================
     function applyThemeByTime() {
         const hour = new Date().getHours();
         const savedTheme = localStorage.getItem('user-preference');
         
+        // HTML'den gelen sabit temayı temizleyip çakışmayı önlüyoruz
+        $('body').removeClass('light-theme dark-theme'); 
+        
         if (savedTheme) {
             $('body').addClass(savedTheme === 'dark' ? 'dark-theme' : 'light-theme');
+            $('#theme-toggle-btn').html(savedTheme === 'dark' ? '<i class="bi bi-sun-fill text-warning"></i> Aydınlık' : '<i class="bi bi-moon-stars-fill"></i> Mod Değiştir');
         } else {
             const theme = (hour >= 6 && hour < 18) ? 'light-theme' : 'dark-theme';
             $('body').addClass(theme);
+            $('#theme-toggle-btn').html(theme === 'dark-theme' ? '<i class="bi bi-sun-fill text-warning"></i> Aydınlık' : '<i class="bi bi-moon-stars-fill"></i> Mod Değiştir');
         }
     }
 
@@ -31,9 +35,8 @@ $(document).ready(function() {
         $body.toggleClass('light-theme dark-theme');
         const currentTheme = $body.hasClass('dark-theme') ? 'dark' : 'light';
         localStorage.setItem('user-preference', currentTheme);
-        $(this).html(currentTheme === 'dark' ? '<i class="bi bi-sun-fill text-warning"></i> Aydınlık' : '<i class="bi bi-moon-stars-fill"></i> Karanlık');
+        $(this).html(currentTheme === 'dark' ? '<i class="bi bi-sun-fill text-warning"></i> Aydınlık' : '<i class="bi bi-moon-stars-fill"></i> Mod Değiştir');
     });
-
     // =================================================================
     // 2. VERİ ÇEKME VE İŞLEME
     // =================================================================
@@ -48,7 +51,7 @@ $(document).ready(function() {
                 rawDataList = data.list; // Hafızaya al
                 const temizVeri = processForecastData(data.list);
                 displayForecastToHTML(temizVeri, data.city.name);
-                createWeatherEffects(data.list[0].weather[0].main); 
+                createWeatherEffects(data.list[0].weather[0].main, data.list[0].weather[0].description); 
                 $('#add-to-fav-btn').fadeIn();
                 $('#weather-details-container').hide(); 
             },
@@ -116,15 +119,19 @@ $(document).ready(function() {
     // =================================================================
     // 3. EFEKT MOTORU
     // =================================================================
-    function createWeatherEffects(condition) {
+    function createWeatherEffects(condition, description = "") {
         const $c = $('#weather-effects-container').empty();
         const w = condition.toLowerCase();
+        const d = description.toLowerCase(); // Türkçe açıklamayı da küçült
         $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
 
-        if (w.includes('rain')) {
+        // Eğer İngilizce 'rain' veya 'drizzle' geçiyorsa YA DA Türkçe açıklama 'yağmur' içeriyorsa:
+        if (w.includes('rain') || w.includes('drizzle') || d.includes('yağmur')) {
             $('body').addClass('rainy-bg');
-            for(let i=0; i<50; i++) $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s"></div>`);
-        } else if (w.includes('clear')) {
+            for(let i=0; i<50; i++) {
+                $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s"></div>`);
+            }
+        } else if (w.includes('clear') || d.includes('açık')) {
             $('body').addClass('sunny-bg');
         } else {
             $('body').addClass('cloudy-bg');

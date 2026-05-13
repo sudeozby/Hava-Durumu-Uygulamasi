@@ -150,7 +150,7 @@ body {
     background: rgba(0, 200, 255, 0.8) !important; /* Karanlıkta Turkuaz */
     z-index: 9999 !important;
     pointer-events: none;
-    animation: rain-fall-new linear infinite; /* Animasyon ismi tutmalı */
+    animation: rain-fall-new 1s linear infinite; /* Animasyon ismi tutmalı */
 }
 
 /* 2. AYDINLIK MOD YAĞMUR (Lacivert) */
@@ -159,19 +159,7 @@ body {
     opacity: 0.9 !important;
 }
 
-/* GÜNEŞLİ (Yumuşak Gün Işığı) */
-.light-theme.sunny-bg { 
-    background: linear-gradient(135deg, #FFF9C4 0%, #FFB74D 100%) !important; 
-}
-/* YAĞMURLU (Taze Yağmur Havası) */
-.light-theme.rainy-bg { 
-    background: linear-gradient(135deg, #E1F5FE 0%, #81D4FA 100%) !important; 
-}
 
-/* BULUTLU (Sakin Gökyüzü) */
-.light-theme.cloudy-bg { 
-    background: linear-gradient(135deg, #F5F5F5 0%, #CFD8DC 100%) !important; 
-}
 /* Aydınlık mod - Bir tık daha koyu soft mavi gradyan */
 
 /* Aydınlık Mod - Favori Kartlarına Özel Soft Lila/Mor Gradyan */
@@ -201,22 +189,6 @@ body {
     color: #ffffff !important;
     border-color: #f1c40f !important;
 }
-/* AYDINLIK MODDA (LIGHT-THEME) YAĞMUR AYARI */
-.light-theme .rain-drop {
-    background: #004a99 !important; /* Koyu canlı bir mavi yaptık */
-    opacity: 0.7 !important;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2); /* Hafif gölge ekledik ki beyazın üstünde patlasın */
-}
-
-/* 4. ANİMASYON (Yağmurun düşmesi için şart) */
-@keyframes rain-fall-new {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(110vh); }
-}
-
-
-
-
 
 
 /* ==========================================
@@ -375,12 +347,6 @@ body {
     font-size: 1.8rem;
     letter-spacing: -1px;
 }   
-
-/* Kartların üzerine hafif bir parıltı ekleyelim */
-.glass-card {
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
-}
 /* --- ARAMA ÇUBUĞU (Yeni Koyu Mavi Kartlara Uyumlu) --- */
 body.light-theme #city-input {
     background: linear-gradient(135deg, rgba(165, 195, 255, 0.6) 0%, rgba(195, 215, 255, 0.7) 100%) !important;
