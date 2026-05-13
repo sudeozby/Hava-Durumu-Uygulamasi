@@ -11,11 +11,9 @@
 }
 
 body { 
-    background-color: var(--bg-color); 
-    color: var(--text-color); 
-    font-family: 'Roboto', sans-serif; 
-    transition: background 0.5s ease, color 0.5s ease; /* Yumuşak geçiş için */
-    min-height: 100vh; 
+    background-color: var(--bg-color) !important; /* Renk garantisi */
+    color: var(--text-color) !important; 
+    transition: background 0.4s ease, color 0.4s ease;
 }
 /* Bildirim Etiketi Genel Yapısı */
 .toast-message {
@@ -395,4 +393,112 @@ body {
         opacity: 1; 
         transform: translateY(0); 
     }
+}
+/* =================================================================
+   HEADER (BAŞLIK, SAAT, BUTON) - ORİJİNAL YERLERİ KORUMA
+   ================================================================= */
+
+header, .glass-header {
+    display: flex !important;
+    justify-content: space-between !important; /* Sol ve Sağ uçları belirler */
+    align-items: center !important;
+    padding: 10px 40px !important;
+    position: relative !important; /* Saat için referans */
+    width: 100% !important;
+}
+
+/* 1. Başlık (Solda Kalsın) */
+.glass-header h1 {
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+    white-space: nowrap !important;
+    /* Yerinden oynamaması için flex-grow kapalı */
+    flex: 0 1 auto !important; 
+}
+
+/* 2. Canlı Saat (Tam Merkeze Çivile - Kimseyi İtmez) */
+#live-clock {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin: 0 !important;
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+
+/* 3. Tema Butonu (Sağda Kalsın ve Kendi Boyutunda Dursun) */
+#theme-toggle-btn {
+    margin: 0 !important;
+    width: auto !important; /* Mavi uzantıyı bitiren sihirli dokunuş */
+    padding: 8px 16px !important;
+    border-radius: 50px !important;
+    white-space: nowrap !important;
+    /* Yerinden oynamaması için flex-grow kapalı */
+    flex: 0 1 auto !important; 
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+/* Mobil için çakışma önleyici */
+@media (max-width: 768px) {
+    #live-clock {
+        position: static !important; /* Mobilde yer darsa normal akışa dön */
+        transform: none !important;
+        left: auto !important;
+    }
+    header, .glass-header {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+}
+/* =================================================================
+   HEADER KESİN SABİTLEME (SOL-ORTA-SAĞ DENGESİ)
+   ================================================================= */
+
+
+
+/* 3. TEMA BUTONU - SAĞA SABİT VE KENDİ BOYUTUNDA */
+#theme-toggle-btn {
+    flex: 0 0 auto !important; /* Büyüme, küçülme, sadece yazı kadar yer kapla */
+    width: auto !important;    /* Mavi şeridi bitiren komut */
+   
+}
+/* =================================================================
+   SADECE YATAY KAYDIRMA (SCROLL) AYARI
+   ================================================================= */
+
+/* 1. Kutuların kapsayıcısı: Yana kaydırmayı zorunlu kılar */
+.custom-scroll {
+    display: flex !important;
+    flex-wrap: nowrap !important; /* Kutular asla alt satıra geçmez */
+    overflow-x: auto !important;   /* İçerik taşarsa scrollbar çıkar */
+    padding-bottom: 10px !important;
+    -webkit-overflow-scrolling: touch; /* Mobilde kaydırma hissi için */
+}
+
+/* 2. Saat kutuları: Ezilip büzülmelerini engeller */
+.hour-box {
+    flex: 0 0 auto !important; /* Kutular küçülmez, orijinal boyutunu korur */
+    width: 100px !important;    /* Genişliği sabitledik */
+}
+
+/* 3. Kaydırma Çubuğunun Görünümü (Scrollbar) */
+.custom-scroll::-webkit-scrollbar {
+    height: 8px !important; /* Çubuğun kalınlığı */
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05) !important; /* Çubuğun yolu */
+    border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #555 !important; /* Kaydırdığın koyu gri parça */
+    border-radius: 10px;
+}
+
+.dark-theme .custom-scroll::-webkit-scrollbar-thumb {
+    background: #888 !important; /* Koyu modda biraz daha açık gri */
 }

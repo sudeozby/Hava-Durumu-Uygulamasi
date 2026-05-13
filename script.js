@@ -11,29 +11,37 @@ $(document).ready(function() {
     renderFavorites();
     startClock(); // Saat fonksiyonunu burada başlatıyoruz
 
-    // =================================================================
-    // 1. TEMA YÖNETİMİ
-    // =================================================================
-    function applyThemeByTime() {
-        const hour = new Date().getHours();
-        const savedTheme = localStorage.getItem('user-preference');
-        
-        if (savedTheme) {
-            $('body').addClass(savedTheme === 'dark' ? 'dark-theme' : 'light-theme');
-        } else {
-            const theme = (hour >= 6 && hour < 18) ? 'light-theme' : 'dark-theme';
-            $('body').addClass(theme);
-        }
+    /// =================================================================
+// 1. TEMA YÖNETİMİ (SADECE BURAYI DEĞİŞTİR, GERİSİNE DOKUNMA)
+// =================================================================
+
+function applyTheme(theme) {
+    // ÇAKIŞMAYI ÖNLEYEN KRİTİK SATIR: Önce her şeyi siler
+    $('body').removeClass('light-theme dark-theme');
+    
+    if (theme === 'dark') {
+        $('body').addClass('dark-theme');
+        $('#theme-toggle-btn').html('<i class="bi bi-sun-fill text-warning"></i> Aydınlık');
+        localStorage.setItem('user-preference', 'dark');
+    } else {
+        $('body').addClass('light-theme');
+        $('#theme-toggle-btn').html('<i class="bi bi-moon-stars-fill"></i> Mod Değiştir');
+        localStorage.setItem('user-preference', 'light');
     }
+}
 
-    $('#theme-toggle-btn').on('click', function() {
-        const $body = $('body');
-        $body.toggleClass('light-theme dark-theme');
-        const currentTheme = $body.hasClass('dark-theme') ? 'dark' : 'light';
-        localStorage.setItem('user-preference', currentTheme);
-        $(this).html(currentTheme === 'dark' ? '<i class="bi bi-sun-fill text-warning"></i> Aydınlık' : '<i class="bi bi-moon-stars-fill"></i> Karanlık');
-    });
+function applyThemeByTime() {
+    const saved = localStorage.getItem('user-preference');
+    const hour = new Date().getHours();
+    // Varsa kayıtlıyı, yoksa saatlik olanı uygula
+    applyTheme(saved ? saved : (hour >= 6 && hour < 18 ? 'light' : 'dark'));
+}
 
+$('#theme-toggle-btn').on('click', function() {
+    // Sadece takas yapar
+    const newTheme = $('body').hasClass('dark-theme') ? 'light' : 'dark';
+    applyTheme(newTheme);
+});
     // =================================================================
     // 2. VERİ ÇEKME VE İŞLEME
     // =================================================================
@@ -186,6 +194,7 @@ $(document).ready(function() {
         const desc = $('#forecast-cards-container .small').first().text();
         const iconSrc = $('#forecast-cards-container img').first().attr('src');
         const iconCode = iconSrc ? iconSrc.split('/wn/')[1].split('@')[0] : '01d';
+        
 
         if (favorites.length >= 6 && !favorites.some(f => f.name === city)) {
             showNotification("Maksimum 6 favori eklenebilir.", "info");
@@ -252,20 +261,20 @@ $(document).ready(function() {
                     </div>
                     <div class="d-flex flex-nowrap overflow-x-auto gap-3 pb-3" style="scrollbar-width: thin;">`;
 
-            dayData.forEach(hour => {
-                const time = hour.dt_txt.split(' ')[1].substring(0, 5);
-                hourlyHtml += `
-                    <div class="p-3 text-center hour-box rounded shadow-sm">
-                        <small class="fw-bold d-block mb-1 text-primary">${time}</small>
-                        <img src="https://openweathermap.org/img/wn/${hour.weather[0].icon}.png" width="45">
-                        <div class="fs-5 fw-bold mb-2">${Math.round(hour.main.temp)}°</div>
-                        <div class="d-flex flex-column gap-1 border-top pt-2 mt-1" style="font-size: 0.7rem; opacity: 0.8;">
-                            <span><i class="bi bi-droplets"></i> %${hour.main.humidity}</span>
-                            <span><i class="bi bi-wind"></i> ${hour.wind.speed} m/s</span>
-                        </div>
-                    </div>`;
-            });
-
+          // script.js içindeki döngü satırını bununla güncelle:
+dayData.forEach(hour => {
+    const time = hour.dt_txt.split(' ')[1].substring(0, 5);
+    hourlyHtml += `
+        <div class="p-3 text-center hour-box rounded shadow-sm" style="min-width: 170px;"> 
+            <div class="fw-bold text-primary mb-2" style="font-size: 1rem;">${time}</div>
+            <img src="https://openweathermap.org/img/wn/${hour.weather[0].icon}@2x.png" width="50" class="mx-auto d-block">
+            <div class="fw-bold fs-4 my-2">${Math.round(hour.main.temp)}°</div>
+            <div class="d-flex flex-column gap-1 border-top pt-2 mt-1" style="font-size: 0.8rem; opacity: 0.8;">
+                <span><i class="bi bi-droplets"></i> %${hour.main.humidity}</span>
+                <span><i class="bi bi-wind"></i> ${hour.wind.speed} m/s</span>
+            </div>
+        </div>`;
+});
             hourlyHtml += `</div></div>`;
             $details.html(hourlyHtml).hide().fadeIn(400);
             window.scrollTo({ top: $details.offset().top - 120, behavior: 'smooth' });
