@@ -441,10 +441,10 @@ header, .glass-header {
     gap: 8px !important;
 }
 
-/* Mobil için çakışma önleyici */
+/* Mobil için çakışma önleyici 
 @media (max-width: 768px) {
     #live-clock {
-        position: static !important; /* Mobilde yer darsa normal akışa dön */
+        position: static !important; 
         transform: none !important;
         left: auto !important;
     }
@@ -452,7 +452,7 @@ header, .glass-header {
         flex-direction: column !important;
         gap: 10px !important;
     }
-}
+}*/
 /* =================================================================
    HEADER KESİN SABİTLEME (SOL-ORTA-SAĞ DENGESİ)
    ================================================================= */
@@ -501,4 +501,60 @@ header, .glass-header {
 
 .dark-theme .custom-scroll::-webkit-scrollbar-thumb {
     background: #888 !important; /* Koyu modda biraz daha açık gri */
+}
+/* =================================================================
+   MOBİL İÇİN (Header & Mod Butonu)
+   ================================================================= */
+
+@media (max-width: 768px) {
+    /* 1. Header ve içindeki konteynırı alt alta dizilmeye ZORLA */
+    header, .glass-header, .glass-header .container {
+        display: flex !important;
+        flex-direction: column !important; /* Yanyana dizilimi KESİN iptal eder */
+        align-items: center !important;   /* Her şeyi ortalar */
+        height: auto !important;
+        padding: 15px 5px !important;
+        gap: 12px !important;
+    }
+
+    /* 2. Başlık (Hava Durumu Merkezi) */
+    .glass-header h1 {
+        font-size: 1.3rem !important;
+        text-align: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* 3. Saati merkeze çivile ve absolute konumunu SIFIRLA */
+    #live-clock {
+        position: relative !important; /* Sağa kaçmasını engelleyen en önemli satır */
+        left: auto !important;
+        transform: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        text-align: center !important;
+        font-size: 1.2rem !important;
+    }
+
+    /* 4. MOD BUTONU - Sağa kaçan butonu merkeze getirir */
+    #theme-toggle-btn {
+        position: relative !important;
+        right: auto !important;
+        width: 80% !important; /* Ekranın %80'ini kaplasın */
+        margin: 0 auto !important; /* Ortalar */
+        display: flex !important;
+        justify-content: center !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* 5. Arama çubuğu ezilmesin, tam genişlik olsun */
+    .search-box-panel .input-group {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    #city-input, #get-weather-btn {
+        width: 100% !important;
+        border-radius: 10px !important;
+    }
 }
