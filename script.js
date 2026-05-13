@@ -12,7 +12,7 @@ $(document).ready(function() {
     startClock(); // Saat fonksiyonunu burada başlatıyoruz
 
     /// =================================================================
-// 1. TEMA YÖNETİMİ (SADECE BURAYI DEĞİŞTİR, GERİSİNE DOKUNMA)
+// 1. TEMA YÖNETİMİ 
 // =================================================================
 
 function applyTheme(theme) {
@@ -56,7 +56,7 @@ $('#theme-toggle-btn').on('click', function() {
                 rawDataList = data.list; 
                 const temizVeri = processForecastData(data.list);
                 displayForecastToHTML(temizVeri, data.city.name);
-                // DÜZELTME: Hem condition hem iconCode gönderilmeli
+                // Hem condition hem iconCode gönderilmeli
                 createWeatherEffects(data.list[0].weather[0].main, data.list[0].weather[0].icon); 
                 $('#add-to-fav-btn').fadeIn();
                 $('#weather-details-container').hide(); 
@@ -73,7 +73,7 @@ $('#theme-toggle-btn').on('click', function() {
  function processForecastData(list) {
     const daily = {};
     
-    // Verileri tarihlere göre grupluyoruz [cite: 132-135]
+    // Verileri tarihlere göre grupluyoruz 
     list.forEach(item => {
         const date = item.dt_txt.split(' ')[0];
         if (!daily[date]) daily[date] = { temps: [], icons: [], desc: [], mainCond: [] };
@@ -85,7 +85,7 @@ $('#theme-toggle-btn').on('click', function() {
     });
 
     return Object.keys(daily).slice(0, 5).map(date => {
-        // --- KRİTİK DOKUNUŞ: Gündüz ikonunu bulmaya çalışıyoruz ---
+        //  Gündüz ikonunu bulmaya çalışıyoruz 
         // Liste içinde 'd' (day) olan ikonu bul, yoksa ilkini al
         const gunIcindekiIkon = daily[date].icons.find(i => i.includes('d')) || daily[date].icons[0];
 
@@ -93,7 +93,7 @@ $('#theme-toggle-btn').on('click', function() {
             tarih: new Date(date).toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' }),
             enYuksek: Math.round(Math.max(...daily[date].temps)),
             durum: daily[date].desc[0],
-            ikon: gunIcindekiIkon, // Bu isim 'displayForecastToHTML' ile uyuşmalı [cite: 266]
+            ikon: gunIcindekiIkon, // Bu isim 'displayForecastToHTML' ile uyuşmalı 
             mainCond: daily[date].mainCond[0]
         };
     });
@@ -135,14 +135,14 @@ $('#theme-toggle-btn').on('click', function() {
     // Eski arkaplanları temizle
     $('body').removeClass('rainy-bg sunny-bg cloudy-bg');
 
-    // A) YAĞMUR EFEKTİ
+    //  YAĞMUR EFEKTİ
     if (w.includes('rain')) {
         $('body').addClass('rainy-bg');
         for(let i=0; i<80; i++) {
             $c.append(`<div class="rain-drop" style="left:${Math.random()*100}vw; animation-duration:${Math.random()+0.5}s; animation-delay:${Math.random()}s"></div>`);
         }
     } 
-    // B) GÜNEŞLİ VEYA AÇIK GECE EFEKTİ
+    //  GÜNEŞLİ VEYA AÇIK GECE EFEKTİ
     else if (w.includes('clear')) {
         if (iconCode && !iconCode.includes('n')) {
             // Gündüz: Güneş ışınları
@@ -155,7 +155,7 @@ $('#theme-toggle-btn').on('click', function() {
             }
         }
     } 
-    // C) BULUTLU HAVA
+    // BULUTLU HAVA
     else if (w.includes('cloud')) {
         $('body').addClass('cloudy-bg');
         for(let i=0; i<6; i++) {
@@ -261,7 +261,7 @@ $('#theme-toggle-btn').on('click', function() {
                     </div>
                     <div class="d-flex flex-nowrap overflow-x-auto gap-3 pb-3" style="scrollbar-width: thin;">`;
 
-          // script.js içindeki döngü satırını bununla güncelle:
+          
 dayData.forEach(hour => {
     const time = hour.dt_txt.split(' ')[1].substring(0, 5);
     hourlyHtml += `

@@ -70,14 +70,14 @@ body {
 .weather-card:hover { transform: translateY(-5px); }
 .weather-card.active { border: 2px solid #6c5ce7 !important; }
 
-/* KÜBRA'NIN EFEKTLERİ */
+/* EFEKTLER */
 #weather-effects-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9999 !important; /* Sayfadaki her şeyin üstüne çıkardık */
+    z-index: 9999 !important; /* Sayfadaki her şeyin üstüne çıkardım */
     pointer-events: none; /* Üstte olsa bile butonlara tıklamanı engellemez */
 }
 
@@ -86,7 +86,7 @@ body {
     color: rgba(255, 255, 255, 0.5);
 }
 
-/* Favori kutularını tıklanabilir yap */
+/* Favori kutularını tıklanabilir yapar */
 .fav-card {
     cursor: pointer;
     transition: all 0.3s ease;
@@ -131,9 +131,8 @@ body {
 /* BULUTLU */
 .light-theme.cloudy-bg { background: linear-gradient(to bottom, #eeeeee, #ffffff) !important; }
 .dark-theme.cloudy-bg { background: linear-gradient(to bottom, #334155, #0f172a) !important; }
-/* 3. YAĞMUR DAMLASI GÖRÜNÜRLÜĞÜ */
+
 /* YAĞMUR DAMLASI - HEM AYDINLIK HEM KARANLIK MOD UYUMLU */
-/* YAĞMUR DAMLASI - GARANTİLİ GÖRÜNÜRLÜK */
 /* Genel Damla Yapısı */
 /* ==========================================
    YAĞMUR VE AY GÖRÜNÜRLÜK PAKETİ
@@ -188,7 +187,6 @@ body {
 
 /* --- BAŞLIK VE YAZI DÜZELTMELERİ --- */
 
-/* İşte Sude, burası kritik! */
 .light-theme .glass-header h1,
 .light-theme #forecast-city-name { /* Bu satır Ankara yazısını hedefler */
     color: #1e3a8a !important; /* Düz beyaz yerine koyu mavi yaptık */
@@ -203,7 +201,7 @@ body {
 .light-theme .rain-drop {
     background: #004a99 !important; /* Koyu canlı bir mavi yaptık */
     opacity: 0.7 !important;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2); /* Hafif gölge ekledik ki beyazın üstünde patlasın */
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2); /* Hafif gölge ekledik ki beyazın üstünde gözüksün */
 }
 
 /* 4. ANİMASYON (Yağmurun düşmesi için şart) */
@@ -213,12 +211,8 @@ body {
 }
 
 
-
-
-
-
 /* ==========================================
-   Sude'nin Favori Kartları Makyaj Bölümü 
+   Favori Kartlar ve Makyaj Bölümü 
    ========================================== */
 
 /* 1. İKONLARI ORTALA VE GÜZELLEŞTİR */
